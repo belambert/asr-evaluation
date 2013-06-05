@@ -11,6 +11,7 @@ Command line usage
 ==================
 
 For command line usage, see:
-python editdistance.py --help
+
+    python editdistance.py --help
 
 This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python
