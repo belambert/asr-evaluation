@@ -8,6 +8,6 @@ setup(
     packages=['asr_evaluation'],
     license='LICENSE.txt',
     description='Evaluating ASR (automatic speech recognitiuon) hypotheses, i.e. computing word error rate.',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     install_requires=['editdistance'],
 )
