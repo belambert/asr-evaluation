@@ -3,7 +3,6 @@ from __future__ import division
 import editdistance
 import sys
 import argparse
-import numpy
 from itertools import izip
 from collections import defaultdict
 
@@ -14,34 +13,57 @@ parser.add_argument('hyp', type=file, help='the ASR hypothesis filename')
 parser.add_argument('-i', '--print-instances', action='store_true', help='print the individual sentences and their errors')
 parser.add_argument('-id', '--has-ids', action='store_true', help='hypothesis and reference files have ids in the last token?')
 parser.add_argument('-c', '--confusions', action='store_true', help='print tables of which words were confused')
-parser.add_argument('-p', '--plot-wer-vs-length', action='store_true', help='print tables of which words were confused')
+parser.add_argument('-p', '--print-wer-vs-length', action='store_true', help='print table of average WER grouped by reference sentence length')
 parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count', help='minimum word count to show a word in confusions')
 args = parser.parse_args()
 
+# Put the command line options into global variables.
 print_instances = args.print_instances
 files_have_ids = args.has_ids
 confusions = args.confusions
 min_count= args.min_word_count
 plot= args.plot_wer_vs_length
 
+# For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
 error_count = 0
 match_count = 0
 
+# For keeping track of word error rates by sentence length
+# this is so we can see if performance is better/worse for longer
+# and/or shorter sentences
 lengths = []
 error_rates = []
 wer_bins = [[] for x in xrange(20)]
 
+# Tables for keeping track of which words get confused with one another
+insertion_table = defaultdict(int)
+deletion_table = defaultdict(int)
+substitution_table = defaultdict(int)
+
+# These are the editdistance opcodes that are condsidered 'errors'
+error_codes = ['replace', 'delete', 'insert']
+
 def main():
+    """Main method - this reads the hyp and ref files, and creates
+    editdistance.SequenceMatcher objects to compute the edit distance.
+    All the statistics necessary statistics are collected, and results are
+    printed as specified by the command line options.
+
+    This function doesn't not check to ensure that the reference and
+    hypothesis file have the same number of lines.  It will stop after the
+    shortest one runs out of lines.  This should be easy to fix...
+    """
     global error_count
     global match_count
     global ref_token_count
-
     counter = 1
+    # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in izip(args.ref, args.hyp):
         ref = ref_line.split()
         hyp = hyp_line.split()
         id = None
+        # If the files have IDs, then split the ID off from the text
         if files_have_ids:
             ref_id = ref[-1]
             hyp_id = hyp[-1]
@@ -49,17 +71,21 @@ def main():
             id = ref_id
             ref = ref[:-1]
             hyp = hyp[:-1]
-            #sm = editdistance.SequenceMatcher(a=ref, b=hyp, action_function=editdistance.highest_match_action)
-            sm = editdistance.SequenceMatcher(a=ref, b=hyp)
+        # Create an object to get the edit distance, and then retrieve the
+        # relevant counts that we need.
+        sm = editdistance.SequenceMatcher(a=ref, b=hyp)
         errors = get_error_count(sm)
         matches = get_match_count(sm)
         ref_length = len(ref)
+        # Increment the total counts we're tracking
         error_count += errors
         match_count += matches
         ref_token_count += ref_length
-        
+        # If we're keeping track of which words get mixed up with which others,
+        # call track_confusions
         if confusions:
             track_confusions(sm, ref, hyp)
+        # If we're printing instances, do it here (in roughly the align.c format)
         if print_instances:
             print_diff(sm, ref, hyp)
             if id:
@@ -68,25 +94,22 @@ def main():
                 print "SENTENCE %d"%counter
             print "Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count)
             print "Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count)
+        # Keep track of the individual error rates, and reference lengths, so we
+        # can compute average WERs by sentence length
         lengths.append(ref_length)
         error_rates.append(errors * 1.0 / len(ref))
         wer_bins[len(ref)].append(errors * 1.0 / len(ref))
         counter = counter + 1
     if confusions:
         print_confusions()
-    if plot:
-        plot_wers()
-
-    wers_vs_length()
+    print_wer_vs_length()
     print "WRR: %f %% (%10d / %10d)"%(100*match_count/ref_token_count, match_count, ref_token_count)
     print "WER: %f %% (%10d / %10d)"%(100*error_count/ref_token_count, error_count, ref_token_count)
 
 
-insertion_table = defaultdict(int)
-deletion_table = defaultdict(int)
-substitution_table = defaultdict(int)
-
 def print_confusions ():
+    """Print the confused words that we found... grouped by insertions, deletions
+    and substitutions."""
     if len(insertion_table) > 0:
         print "INSERTIONS:"
         for item in sorted(insertion_table.items(), key=lambda x: x[1], reverse=True):
@@ -104,7 +127,7 @@ def print_confusions ():
                 print "%20s -> %20s   %10d"%(w1, w2, count)
 
 def track_confusions(sm, seq1, seq2):
-    "Keep track of the errors in a global variable, given a sequence matcher."
+    """Keep track of the errors in a global variable, given a sequence matcher."""
     opcodes = sm.get_opcodes()
     for tag, i1, i2, j1, j2 in opcodes:
         if tag == 'insert':
@@ -125,14 +148,12 @@ def track_confusions(sm, seq1, seq2):
 def get_match_count(sm):
     "Return the number of matches, given a sequence matcher object."
     matches = None
-    # try:
-    #     matches = sm.matches()
-    # except:
+    matches1 = sm.matches()
     matching_blocks = sm.get_matching_blocks()
-    matches = reduce(lambda x, y: x + y, map(lambda x: x[2], matching_blocks), 0)
+    matches2 = reduce(lambda x, y: x + y, map(lambda x: x[2], matching_blocks), 0)
+    assert(matches1 == matches 2)
+    matches = matches1
     return matches
-
-error_codes = ['replace', 'delete', 'insert']
 
 def get_error_count(sm):
     """Return the number of errors (insertion, deletion, and substitutiions
@@ -197,10 +218,13 @@ def print_diff(sm, seq1, seq2):
     print "REF: %s"%' '.join(ref_tokens)
     print "HYP: %s"%' '.join(hyp_tokens)
 
-
-
-def wers_vs_length():
-    avg_wers = map(numpy.mean, wer_bins)
+def mean(seq):
+    """Return the average of the elements of a sequence."""
+    return float(sum(seq))/len(seq) if len(seq) > 0 else float('nan')
+    
+def print_wer_vs_length():
+    """Print the average word error rate for each length sentence."""
+    avg_wers = map(mean, wer_bins)
     for i in range(len(avg_wers)):
         print "%5d %f"%(i, avg_wers[i])
     print ""
@@ -214,7 +238,10 @@ def wers_vs_length():
 # import numpy
 
 # def plot_wers():
-#         # Create a figure with size 6 x 6 inches.
+#     """Plotting the results in this way is not helpful.
+#     however there are probably other useful plots we
+#     could use."""
+#     # Create a figure with size 6 x 6 inches.
 #     fig = Figure(figsize=(6,6))
 #     # Create a canvas and add the figure to it.
 #     canvas = FigureCanvas(fig)
