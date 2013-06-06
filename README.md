@@ -10,6 +10,8 @@ The formatting of the output of this program is very loosely based around the sa
 
 This may run a bit faster if neither instances nor confusions are printed.
 
+Please let me know if you have any comments, questions, or problems!
+
 Command line usage
 ------------------
 
@@ -43,4 +45,4 @@ It should be something like this:
 
 
 
-This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python
+This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python.
