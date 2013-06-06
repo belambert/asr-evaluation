@@ -22,7 +22,7 @@ print_instances = args.print_instances
 files_have_ids = args.has_ids
 confusions = args.confusions
 min_count= args.min_word_count
-plot= args.plot_wer_vs_length
+plot= args.print_wer_vs_length
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
@@ -151,7 +151,7 @@ def get_match_count(sm):
     matches1 = sm.matches()
     matching_blocks = sm.get_matching_blocks()
     matches2 = reduce(lambda x, y: x + y, map(lambda x: x[2], matching_blocks), 0)
-    assert(matches1 == matches 2)
+    assert(matches1 == matches2)
     matches = matches1
     return matches
 
