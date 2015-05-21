@@ -1,10 +1,10 @@
 from __future__ import division
 
-import editdistance
 import sys
 import argparse
 from itertools import izip
 from collections import defaultdict
+from editdistance.editdistance import SequenceMatcher
 
 # This is the command line interface!
 parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
