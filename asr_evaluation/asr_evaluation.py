@@ -21,8 +21,9 @@ args = parser.parse_args()
 print_instances = args.print_instances
 files_have_ids = args.has_ids
 confusions = args.confusions
-min_count= args.min_word_count
-plot= args.print_wer_vs_length
+min_count = args.min_word_count
+#plot = args.print_wer_vs_length
+wer_vs_length = args.print_wer_vs_length
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
@@ -102,7 +103,8 @@ def main():
         counter = counter + 1
     if confusions:
         print_confusions()
-    print_wer_vs_length()
+    if wer_vs_length:
+        print_wer_vs_length()
     print "WRR: %f %% (%10d / %10d)"%(100*match_count/ref_token_count, match_count, ref_token_count)
     print "WER: %f %% (%10d / %10d)"%(100*error_count/ref_token_count, error_count, ref_token_count)
 
