@@ -73,7 +73,7 @@ def main():
             hyp = hyp[:-1]
         # Create an object to get the edit distance, and then retrieve the
         # relevant counts that we need.
-        sm = editdistance.SequenceMatcher(a=ref, b=hyp)
+        sm = SequenceMatcher(a=ref, b=hyp)
         errors = get_error_count(sm)
         matches = get_match_count(sm)
         ref_length = len(ref)
