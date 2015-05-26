@@ -35,7 +35,7 @@ match_count = 0
 # and/or shorter sentences
 lengths = []
 error_rates = []
-wer_bins = [[] for x in xrange(20)]
+wer_bins = defaultdict(list)
 
 # Tables for keeping track of which words get confused with one another
 insertion_table = defaultdict(int)
@@ -226,8 +226,9 @@ def mean(seq):
     
 def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
-    avg_wers = map(mean, wer_bins)
-    for i in range(len(avg_wers)):
+    values = wer_bins.values()
+    avg_wers = map(lambda x: (x[0], mean(x[1])), values)
+    for length, avg in sorted(avg_wers, key=lambda x: x[1]):
         print "%5d %f"%(i, avg_wers[i])
     print ""
 
