@@ -2,7 +2,6 @@ import sys
 from functools import reduce
 from collections import defaultdict
 from editdistance.editdistance import SequenceMatcher
-from editdistance.editdistance import SequenceMatcher
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
@@ -16,7 +15,6 @@ lengths = []
 error_rates = []
 wer_bins = defaultdict(list)
 wer_vs_length = defaultdict(list)
-# wer_bins = [[] for x in range(20)]
 
 # Tables for keeping track of which words get confused with one another
 insertion_table = defaultdict(int)
