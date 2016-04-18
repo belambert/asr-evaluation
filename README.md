@@ -17,7 +17,7 @@ Command line usage
 
 For command line usage, see:
 
-    python editdistance.py --help
+    python bin/evaluate.py --help
 
 It should be something like this:
 
@@ -44,5 +44,4 @@ It should be something like this:
                             minimum word count to show a word in confusions
 
 
-
-This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python.
+This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python.  It is now Python3 compliant.
