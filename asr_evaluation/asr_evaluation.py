@@ -3,6 +3,7 @@ from functools import reduce
 from collections import defaultdict
 from editdistance.editdistance import SequenceMatcher
 
+
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
 error_count = 0
@@ -23,6 +24,7 @@ substitution_table = defaultdict(int)
 
 # These are the editdistance opcodes that are condsidered 'errors'
 error_codes = ['replace', 'delete', 'insert']
+
 
 def main(args):
     """Main method - this reads the hyp and ref files, and creates
@@ -47,8 +49,8 @@ def main(args):
     print_instances = args.print_instances
     files_have_ids = args.has_ids
     confusions = args.confusions
-    min_count= args.min_word_count
-    plot= args.print_wer_vs_length
+    min_count = args.min_word_count
+    plot = args.print_wer_vs_length
 
     counter = 1
     # Loop through each line of the reference and hyp file
@@ -82,9 +84,9 @@ def main(args):
         if print_instances:
             print_diff(sm, ref, hyp)
             if id:
-                print(("SENTENCE %d  %s"%(counter, id)))
+                print(("SENTENCE %d  %s" % (counter, id)))
             else:
-                print("SENTENCE %d"%counter)
+                print("SENTENCE %d" % counter)
             print("Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count))
             print("Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count))
         # Keep track of the individual error rates, and reference lengths, so we
@@ -97,39 +99,40 @@ def main(args):
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print("WRR: %f %% (%10d / %10d)"%(100*match_count/ref_token_count, match_count, ref_token_count))
-    print("WER: %f %% (%10d / %10d)"%(100*error_count/ref_token_count, error_count, ref_token_count))
+    print("WRR: %f %% (%10d / %10d)" % (100*match_count/ref_token_count, match_count, ref_token_count))
+    print("WER: %f %% (%10d / %10d)" % (100*error_count/ref_token_count, error_count, ref_token_count))
 
 
-def print_confusions ():
+def print_confusions():
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
     if len(insertion_table) > 0:
         print("INSERTIONS:")
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print("%20s %10d"%item)
+                print("%20s %10d" % item)
     if len(deletion_table) > 0:
         print("DELETIONS:")
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print("%20s %10d"%item)    
+                print("%20s %10d" % item)
     if len(substitution_table) > 0:
         print("SUBSTITUTIONS:")
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
-                print("%20s -> %20s   %10d"%(w1, w2, count))
+                print("%20s -> %20s   %10d" % (w1, w2, count))
+
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
     opcodes = sm.get_opcodes()
     for tag, i1, i2, j1, j2 in opcodes:
         if tag == 'insert':
-            for i in range(j1,j2):
+            for i in range(j1, j2):
                 word = seq2[i]
                 insertion_table[word] += 1
         elif tag == 'delete':
-            for i in range(i1,i2):
+            for i in range(i1, i2):
                 word = seq1[i]
                 deletion_table[word] += 1
         elif tag == 'replace':
@@ -137,6 +140,7 @@ def track_confusions(sm, seq1, seq2):
                 for w2 in seq2[j1:j2]:
                     key = (w1, w2)
                     substitution_table[key] += 1
+
 
 # For some reason I'm getting two different counts depending on how I count the matches....
 def get_match_count(sm):
@@ -149,14 +153,16 @@ def get_match_count(sm):
     matches = matches1
     return matches
 
+
 def get_error_count(sm):
     """Return the number of errors (insertion, deletion, and substitutiions
     , given a sequence matcher object."""
     opcodes = sm.get_opcodes()
     errors = [x for x in opcodes if x[0] in error_codes]
-    error_lengths = [max (x[2] - x[1], x[4] - x[3]) for x in errors]
+    error_lengths = [max(x[2] - x[1], x[4] - x[3]) for x in errors]
     return reduce(lambda x, y: x + y, error_lengths, 0)
-    
+
+
 def print_diff(sm, seq1, seq2):
     """Given a sequence matcher and the two sequences, print a Sphinx-style
     'diff' off the two."""
@@ -165,19 +171,19 @@ def print_diff(sm, seq1, seq2):
     opcodes = sm.get_opcodes()
     for tag, i1, i2, j1, j2 in opcodes:
         if tag == 'equal':
-            for i in range(i1,i2):
+            for i in range(i1, i2):
                 ref_tokens.append(seq1[i].lower())
-            for i in range(j1,j2):
+            for i in range(j1, j2):
                 hyp_tokens.append(seq2[i].lower())
         elif tag == 'delete':
-            for i in range(i1,i2):
+            for i in range(i1, i2):
                 ref_tokens.append(seq1[i].upper())
-            for i in range(i1,i2):
+            for i in range(i1, i2):
                 hyp_tokens.append('*' * len(seq1[i]))
         elif tag == 'insert':
-            for i in range(j1,j2):
+            for i in range(j1, j2):
                 ref_tokens.append('*' * len(seq2[i]))
-            for i in range(j1,j2):
+            for i in range(j1, j2):
                 hyp_tokens.append(seq2[i].upper())
         elif tag == 'replace':
             seq1_len = i2 - i1
@@ -191,7 +197,7 @@ def print_diff(sm, seq1, seq2):
                 for i in range(0, seq2_len-seq1_len):
                     s1.append(False)
             assert(len(s1) == len(s2))
-            for i in range(0,len(s1)):
+            for i in range(0, len(s1)):
                 w1 = s1[i]
                 w2 = s2[i]
                 # If we have two words, make them the same length
@@ -201,29 +207,32 @@ def print_diff(sm, seq1, seq2):
                     elif len(w1) < len(w2):
                         s1[i] = w1 + ' '*(len(w2) - len(w1))
                 # Otherwise, create an empty word of the right width
-                if w1 == False:
-                    s1[i] = '*'*len(w2)
-                if w2 == False:
-                    s2[i] = '*'*len(w1)
+                if not w1:
+                    s1[i] = '*' * len(w2)
+                if not w2:
+                    s2[i] = '*' * len(w1)
             ref_tokens += s1
             hyp_tokens += s2
 
-    print('='*60)
-    print("REF: %s"%' '.join(ref_tokens))
-    print("HYP: %s"%' '.join(hyp_tokens))
+    print('=' * 60)
+    print("REF: %s" % ' '.join(ref_tokens))
+    print("HYP: %s" % ' '.join(hyp_tokens))
+
 
 def mean(seq):
     """Return the average of the elements of a sequence."""
     return float(sum(seq))/len(seq) if len(seq) > 0 else float('nan')
-    
+
+
 def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
     values = wer_bins.values()
     avg_wers = map(lambda x: (x[0], mean(x[1])), values)
     for length, avg in sorted(avg_wers, key=lambda x: x[1]):
-        print("%5d %f"%(i, avg_wers[i]))
+        print("%5d %f" % (i, avg_wers[i]))
     print('')
-    
+
+
 # import matplotlib
 # #import pylab
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -244,17 +253,16 @@ def print_wer_vs_length():
 #     # Set the title.
 #     ax.set_title("WER vs sentence length",fontsize=14)
 #     # Set the X Axis label.
-#     ax.set_xlabel("sentence length (# of words)",fontsize=12)    
+#     ax.set_xlabel("sentence length (# of words)",fontsize=12)
 #     # Set the Y Axis label.
 #     ax.set_ylabel("WER", fontsize=12)
 #     # Display Grid.
-#     #ax.grid(True,linestyle='-',color='0.75')    
+#     #ax.grid(True,linestyle='-',color='0.75')
 #     # Generate the Scatter Plot.
-#     #ax.scatter(lengths, error_rates, s=20,color='tomato');    
-#     ax.scatter(lengths, error_rates, color='tomato');    
+#     #ax.scatter(lengths, error_rates, s=20,color='tomato');
+#     ax.scatter(lengths, error_rates, color='tomato');
 #     # Save the generated Scatter Plot to a PNG file.
 #     canvas.print_figure('wer-vs-length.png',dpi=500)
-
 
 
 if __name__ == "__main__":
