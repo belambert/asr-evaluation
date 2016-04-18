@@ -1,29 +1,8 @@
-from __future__ import division
-
 import sys
-import argparse
-from itertools import izip
+from functools import reduce
 from collections import defaultdict
 from editdistance.editdistance import SequenceMatcher
-
-# This is the command line interface!
-parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
-parser.add_argument('ref', type=file, help='the reference transcript filename')
-parser.add_argument('hyp', type=file, help='the ASR hypothesis filename')
-parser.add_argument('-i', '--print-instances', action='store_true', help='print the individual sentences and their errors')
-parser.add_argument('-id', '--has-ids', action='store_true', help='hypothesis and reference files have ids in the last token?')
-parser.add_argument('-c', '--confusions', action='store_true', help='print tables of which words were confused')
-parser.add_argument('-p', '--print-wer-vs-length', action='store_true', help='print table of average WER grouped by reference sentence length')
-parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count', help='minimum word count to show a word in confusions')
-args = parser.parse_args()
-
-# Put the command line options into global variables.
-print_instances = args.print_instances
-files_have_ids = args.has_ids
-confusions = args.confusions
-min_count = args.min_word_count
-#plot = args.print_wer_vs_length
-wer_vs_length = args.print_wer_vs_length
+from editdistance.editdistance import SequenceMatcher
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
@@ -36,6 +15,8 @@ match_count = 0
 lengths = []
 error_rates = []
 wer_bins = defaultdict(list)
+wer_vs_length = defaultdict(list)
+# wer_bins = [[] for x in range(20)]
 
 # Tables for keeping track of which words get confused with one another
 insertion_table = defaultdict(int)
@@ -45,7 +26,7 @@ substitution_table = defaultdict(int)
 # These are the editdistance opcodes that are condsidered 'errors'
 error_codes = ['replace', 'delete', 'insert']
 
-def main():
+def main(args):
     """Main method - this reads the hyp and ref files, and creates
     editdistance.SequenceMatcher objects to compute the edit distance.
     All the statistics necessary statistics are collected, and results are
@@ -58,9 +39,22 @@ def main():
     global error_count
     global match_count
     global ref_token_count
+    global print_instances
+    global files_have_ids
+    global confusions
+    global min_count
+    global plot
+
+    # Put the command line options into global variables.
+    print_instances = args.print_instances
+    files_have_ids = args.has_ids
+    confusions = args.confusions
+    min_count= args.min_word_count
+    plot= args.print_wer_vs_length
+
     counter = 1
     # Loop through each line of the reference and hyp file
-    for ref_line, hyp_line in izip(args.ref, args.hyp):
+    for ref_line, hyp_line in zip(args.ref, args.hyp):
         ref = ref_line.split()
         hyp = hyp_line.split()
         id = None
@@ -90,11 +84,11 @@ def main():
         if print_instances:
             print_diff(sm, ref, hyp)
             if id:
-                print "SENTENCE %d  %s"%(counter, id)
+                print(("SENTENCE %d  %s"%(counter, id)))
             else:
-                print "SENTENCE %d"%counter
-            print "Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count)
-            print "Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count)
+                print("SENTENCE %d"%counter)
+            print("Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count))
+            print("Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count))
         # Keep track of the individual error rates, and reference lengths, so we
         # can compute average WERs by sentence length
         lengths.append(ref_length)
@@ -105,28 +99,28 @@ def main():
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print "WRR: %f %% (%10d / %10d)"%(100*match_count/ref_token_count, match_count, ref_token_count)
-    print "WER: %f %% (%10d / %10d)"%(100*error_count/ref_token_count, error_count, ref_token_count)
+    print("WRR: %f %% (%10d / %10d)"%(100*match_count/ref_token_count, match_count, ref_token_count))
+    print("WER: %f %% (%10d / %10d)"%(100*error_count/ref_token_count, error_count, ref_token_count))
 
 
 def print_confusions ():
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
     if len(insertion_table) > 0:
-        print "INSERTIONS:"
-        for item in sorted(insertion_table.items(), key=lambda x: x[1], reverse=True):
+        print("INSERTIONS:")
+        for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print "%20s %10d"%item
+                print("%20s %10d"%item)
     if len(deletion_table) > 0:
-        print "DELETIONS:"
-        for item in sorted(deletion_table.items(), key=lambda x: x[1], reverse=True):
+        print("DELETIONS:")
+        for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print "%20s %10d"%item    
+                print("%20s %10d"%item)    
     if len(substitution_table) > 0:
-        print "SUBSTITUTIONS:"
-        for [w1, w2], count in sorted(substitution_table.items(), key=lambda x: x[1], reverse=True):
+        print("SUBSTITUTIONS:")
+        for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
-                print "%20s -> %20s   %10d"%(w1, w2, count)
+                print("%20s -> %20s   %10d"%(w1, w2, count))
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -152,7 +146,7 @@ def get_match_count(sm):
     matches = None
     matches1 = sm.matches()
     matching_blocks = sm.get_matching_blocks()
-    matches2 = reduce(lambda x, y: x + y, map(lambda x: x[2], matching_blocks), 0)
+    matches2 = reduce(lambda x, y: x + y, [x[2] for x in matching_blocks], 0)
     assert(matches1 == matches2)
     matches = matches1
     return matches
@@ -161,8 +155,8 @@ def get_error_count(sm):
     """Return the number of errors (insertion, deletion, and substitutiions
     , given a sequence matcher object."""
     opcodes = sm.get_opcodes()
-    errors = filter(lambda x: x[0] in error_codes, opcodes)
-    error_lengths = map(lambda x: max (x[2] - x[1], x[4] - x[3]), errors)
+    errors = [x for x in opcodes if x[0] in error_codes]
+    error_lengths = [max (x[2] - x[1], x[4] - x[3]) for x in errors]
     return reduce(lambda x, y: x + y, error_lengths, 0)
     
 def print_diff(sm, seq1, seq2):
@@ -190,8 +184,8 @@ def print_diff(sm, seq1, seq2):
         elif tag == 'replace':
             seq1_len = i2 - i1
             seq2_len = j2 - j1
-            s1 = map(str.upper, seq1[i1:i2])
-            s2 = map(str.upper, seq2[j1:j2])
+            s1 = list(map(str.upper, seq1[i1:i2]))
+            s2 = list(map(str.upper, seq2[j1:j2]))
             if seq1_len > seq2_len:
                 for i in range(0, seq1_len-seq2_len):
                     s2.append(False)
@@ -216,9 +210,9 @@ def print_diff(sm, seq1, seq2):
             ref_tokens += s1
             hyp_tokens += s2
 
-    print '='*60
-    print "REF: %s"%' '.join(ref_tokens)
-    print "HYP: %s"%' '.join(hyp_tokens)
+    print('='*60)
+    print("REF: %s"%' '.join(ref_tokens))
+    print("HYP: %s"%' '.join(hyp_tokens))
 
 def mean(seq):
     """Return the average of the elements of a sequence."""
@@ -229,9 +223,8 @@ def print_wer_vs_length():
     values = wer_bins.values()
     avg_wers = map(lambda x: (x[0], mean(x[1])), values)
     for length, avg in sorted(avg_wers, key=lambda x: x[1]):
-        print "%5d %f"%(i, avg_wers[i])
-    print ""
-
+        print("%5d %f"%(i, avg_wers[i]))
+    print('')
     
 # import matplotlib
 # #import pylab
