@@ -3,7 +3,6 @@ from functools import reduce
 from collections import defaultdict
 from editdistance.editdistance import SequenceMatcher
 
-
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
 error_count = 0
@@ -16,16 +15,15 @@ lengths = []
 error_rates = []
 wer_bins = defaultdict(list)
 wer_vs_length = defaultdict(list)
-
 # Tables for keeping track of which words get confused with one another
 insertion_table = defaultdict(int)
 deletion_table = defaultdict(int)
 substitution_table = defaultdict(int)
-
 # These are the editdistance opcodes that are condsidered 'errors'
 error_codes = ['replace', 'delete', 'insert']
 
 
+# TODO - rename this function.  Move some of it into evaluate.py?
 def main(args):
     """Main method - this reads the hyp and ref files, and creates
     editdistance.SequenceMatcher objects to compute the edit distance.
@@ -39,12 +37,77 @@ def main(args):
     global error_count
     global match_count
     global ref_token_count
+    global confusions
+    set_global_variables(args)
+    
+    counter = 1
+    # Loop through each line of the reference and hyp file    
+    for ref_line, hyp_line in zip(args.ref, args.hyp):
+        process_line_pair(ref_line, hyp_line)
+        counter += 1
+    if confusions:
+        print_confusions()
+    if wer_vs_length:
+        print_wer_vs_length()
+    print("WRR: %f %% (%10d / %10d)" % (100*match_count/ref_token_count, match_count, ref_token_count))
+    print("WER: %f %% (%10d / %10d)" % (100*error_count/ref_token_count, error_count, ref_token_count))
+
+
+def process_line_pair(ref_line, hyp_line):
+    """Given a pair of strings corresponding to a reference and hypothesis,
+    compute the edit distance, print if desired, and keep track of results
+    in global variables."""
+    # I don't believe these all need to be global.  In any case, they shouldn't be.
+    global error_count
+    global match_count
+    global ref_token_count
     global print_instances
     global files_have_ids
     global confusions
     global min_count
     global plot
+    
+    ref = ref_line.split()
+    hyp = hyp_line.split()
+    id_ = None
 
+    # If the files have IDs, then split the ID off from the text
+    if files_have_ids:
+        remove_sentence_ids(ref, hyp)
+
+    # Create an object to get the edit distance, and then retrieve the
+    # relevant counts that we need.
+    sm = SequenceMatcher(a=ref, b=hyp)
+    errors = get_error_count(sm)
+    matches = get_match_count(sm)
+    ref_length = len(ref)
+
+    # Increment the total counts we're tracking
+    error_count += errors
+    match_count += matches
+    ref_token_count += ref_length
+
+    # If we're keeping track of which words get mixed up with which others, call track_confusions
+    if confusions:
+        track_confusions(sm, ref, hyp)
+
+    # If we're printing instances, do it here (in roughly the align.c format)
+    if print_instances:
+        print_instances(ref, hyp, sm, id_=id_)
+
+    # Keep track of the individual error rates, and reference lengths, so we
+    # can compute average WERs by sentence length
+    lengths.append(ref_length)
+    error_rates.append(errors * 1.0 / len(ref))
+    wer_bins[len(ref)].append(errors * 1.0 / len(ref))
+
+
+def set_global_variables(args):
+    global print_instances
+    global files_have_ids
+    global confusions
+    global min_count
+    global plot
     # Put the command line options into global variables.
     print_instances = args.print_instances
     files_have_ids = args.has_ids
@@ -52,55 +115,45 @@ def main(args):
     min_count = args.min_word_count
     plot = args.print_wer_vs_length
 
-    counter = 1
-    # Loop through each line of the reference and hyp file
-    for ref_line, hyp_line in zip(args.ref, args.hyp):
-        ref = ref_line.split()
-        hyp = hyp_line.split()
-        id = None
-        # If the files have IDs, then split the ID off from the text
-        if files_have_ids:
-            ref_id = ref[-1]
-            hyp_id = hyp[-1]
-            assert (ref_id == hyp_id)
-            id = ref_id
-            ref = ref[:-1]
-            hyp = hyp[:-1]
-        # Create an object to get the edit distance, and then retrieve the
-        # relevant counts that we need.
-        sm = SequenceMatcher(a=ref, b=hyp)
-        errors = get_error_count(sm)
-        matches = get_match_count(sm)
-        ref_length = len(ref)
-        # Increment the total counts we're tracking
-        error_count += errors
-        match_count += matches
-        ref_token_count += ref_length
-        # If we're keeping track of which words get mixed up with which others,
-        # call track_confusions
-        if confusions:
-            track_confusions(sm, ref, hyp)
-        # If we're printing instances, do it here (in roughly the align.c format)
-        if print_instances:
-            print_diff(sm, ref, hyp)
-            if id:
-                print(("SENTENCE %d  %s" % (counter, id)))
-            else:
-                print("SENTENCE %d" % counter)
-            print("Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count))
-            print("Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count))
-        # Keep track of the individual error rates, and reference lengths, so we
-        # can compute average WERs by sentence length
-        lengths.append(ref_length)
-        error_rates.append(errors * 1.0 / len(ref))
-        wer_bins[len(ref)].append(errors * 1.0 / len(ref))
-        counter = counter + 1
-    if confusions:
-        print_confusions()
-    if wer_vs_length:
-        print_wer_vs_length()
-    print("WRR: %f %% (%10d / %10d)" % (100*match_count/ref_token_count, match_count, ref_token_count))
-    print("WER: %f %% (%10d / %10d)" % (100*error_count/ref_token_count, error_count, ref_token_count))
+def remove_sentence_ids(ref, hyp):
+    """Assumes that the ID is the final token of the string which is common
+    in Sphinx but not in Kaldi."""
+    ref_id = ref[-1]
+    hyp_id = hyp[-1]
+    assert (ref_id == hyp_id)
+    id = ref_id
+    ref = ref[:-1]
+    hyp = hyp[:-1]
+    return ref, hyp
+
+
+def print_instances(ref, hyp, sm, id_=None):
+    print_diff(sm, ref, hyp)
+    if id_:
+        print(("SENTENCE %d  %s" % (counter, id_)))
+    else:
+        print("SENTENCE %d" % counter)
+    print("Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count))
+    print("Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count))
+
+
+def track_confusions(sm, seq1, seq2):
+    """Keep track of the errors in a global variable, given a sequence matcher."""
+    opcodes = sm.get_opcodes()
+    for tag, i1, i2, j1, j2 in opcodes:
+        if tag == 'insert':
+            for i in range(j1, j2):
+                word = seq2[i]
+                insertion_table[word] += 1
+        elif tag == 'delete':
+            for i in range(i1, i2):
+                word = seq1[i]
+                deletion_table[word] += 1
+        elif tag == 'replace':
+            for w1 in seq1[i1:i2]:
+                for w2 in seq2[j1:j2]:
+                    key = (w1, w2)
+                    substitution_table[key] += 1
 
 
 def print_confusions():
@@ -123,26 +176,9 @@ def print_confusions():
                 print("%20s -> %20s   %10d" % (w1, w2, count))
 
 
-def track_confusions(sm, seq1, seq2):
-    """Keep track of the errors in a global variable, given a sequence matcher."""
-    opcodes = sm.get_opcodes()
-    for tag, i1, i2, j1, j2 in opcodes:
-        if tag == 'insert':
-            for i in range(j1, j2):
-                word = seq2[i]
-                insertion_table[word] += 1
-        elif tag == 'delete':
-            for i in range(i1, i2):
-                word = seq1[i]
-                deletion_table[word] += 1
-        elif tag == 'replace':
-            for w1 in seq1[i1:i2]:
-                for w2 in seq2[j1:j2]:
-                    key = (w1, w2)
-                    substitution_table[key] += 1
-
-
-# For some reason I'm getting two different counts depending on how I count the matches....
+# For some reason I was getting two different counts depending on how I count the matches,
+# so do an assertion in this code to make sure we're getting matching counts.
+# This might slow things down?
 def get_match_count(sm):
     "Return the number of matches, given a sequence matcher object."
     matches = None
@@ -163,6 +199,7 @@ def get_error_count(sm):
     return reduce(lambda x, y: x + y, error_lengths, 0)
 
 
+# This is long and ugly.  Perhaps we can break it up?
 def print_diff(sm, seq1, seq2):
     """Given a sequence matcher and the two sequences, print a Sphinx-style
     'diff' off the two."""
@@ -213,7 +250,6 @@ def print_diff(sm, seq1, seq2):
                     s2[i] = '*' * len(w1)
             ref_tokens += s1
             hyp_tokens += s2
-
     print('=' * 60)
     print("REF: %s" % ' '.join(ref_tokens))
     print("HYP: %s" % ' '.join(hyp_tokens))
