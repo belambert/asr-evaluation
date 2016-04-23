@@ -8,18 +8,19 @@ This module depends on my editdistance project, for computing edit distances bet
 
 The formatting of the output of this program is very loosely based around the same idea as the align.c program commonly used within the Sphinx ASR community.  This may run a bit faster if neither instances nor confusions are printed.
 
-Please let me know if you have any comments, questions, or problems!
+Please let me know if you have any comments, questions, or problems.
 
 Command line usage
 ------------------
 
 For command line usage, see:
-
+```
     python bin/evaluate.py --help
+```
 
 It should be something like this:
 
-    
+```    
     usage: asr_evaluation.py [-h] [-i] [-id] [-c] [-p] [-m count] ref hyp
     
     Evaluate an ASR transcript against a reference transcript.
@@ -40,6 +41,6 @@ It should be something like this:
                             sentence length
       -m count, --min-word-count count
                             minimum word count to show a word in confusions
-
+```
 
 This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python.  It is now Python3 compliant.

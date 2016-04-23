@@ -3,6 +3,14 @@ from functools import reduce
 from collections import defaultdict
 from editdistance.editdistance import SequenceMatcher
 
+# Imports for plotting
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.mlab as mlab
+import numpy
+
+
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
 error_count = 0
@@ -269,36 +277,29 @@ def print_wer_vs_length():
     print('')
 
 
-# import matplotlib
-# #import pylab
-# from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-# from matplotlib.figure import Figure
-# import matplotlib.mlab as mlab
-# import numpy
-
-# def plot_wers():
-#     """Plotting the results in this way is not helpful.
-#     however there are probably other useful plots we
-#     could use."""
-#     # Create a figure with size 6 x 6 inches.
-#     fig = Figure(figsize=(6,6))
-#     # Create a canvas and add the figure to it.
-#     canvas = FigureCanvas(fig)
-#     # Create a subplot.
-#     ax = fig.add_subplot(111)
-#     # Set the title.
-#     ax.set_title("WER vs sentence length",fontsize=14)
-#     # Set the X Axis label.
-#     ax.set_xlabel("sentence length (# of words)",fontsize=12)
-#     # Set the Y Axis label.
-#     ax.set_ylabel("WER", fontsize=12)
-#     # Display Grid.
-#     #ax.grid(True,linestyle='-',color='0.75')
-#     # Generate the Scatter Plot.
-#     #ax.scatter(lengths, error_rates, s=20,color='tomato');
-#     ax.scatter(lengths, error_rates, color='tomato');
-#     # Save the generated Scatter Plot to a PNG file.
-#     canvas.print_figure('wer-vs-length.png',dpi=500)
+def plot_wers():
+    """Plotting the results in this way is not helpful.
+    however there are probably other useful plots we
+    could use."""
+    # Create a figure with size 6 x 6 inches.
+    fig = Figure(figsize=(6,6))
+    # Create a canvas and add the figure to it.
+    canvas = FigureCanvas(fig)
+    # Create a subplot.
+    ax = fig.add_subplot(111)
+    # Set the title.
+    ax.set_title("WER vs sentence length",fontsize=14)
+    # Set the X Axis label.
+    ax.set_xlabel("sentence length (# of words)",fontsize=12)
+    # Set the Y Axis label.
+    ax.set_ylabel("WER", fontsize=12)
+    # Display Grid.
+    #ax.grid(True,linestyle='-',color='0.75')
+    # Generate the Scatter Plot.
+    #ax.scatter(lengths, error_rates, s=20,color='tomato');
+    ax.scatter(lengths, error_rates, color='tomato');
+    # Save the generated Scatter Plot to a PNG file.
+    canvas.print_figure('wer-vs-length.png', dpi=500)
 
 
 if __name__ == "__main__":
