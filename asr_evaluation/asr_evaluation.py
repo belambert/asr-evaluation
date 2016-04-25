@@ -57,8 +57,8 @@ def main(args):
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print("WRR: %f %% (%10d / %10d)" % (100*match_count/ref_token_count, match_count, ref_token_count))
-    print("WER: %f %% (%10d / %10d)" % (100*error_count/ref_token_count, error_count, ref_token_count))
+    print('WRR: %f %% (%10d / %10d)' % (100*match_count/ref_token_count, match_count, ref_token_count))
+    print('WER: %f %% (%10d / %10d)' % (100*error_count/ref_token_count, error_count, ref_token_count))
 
 
 def process_line_pair(ref_line, hyp_line):
@@ -138,11 +138,11 @@ def remove_sentence_ids(ref, hyp):
 def print_instances(ref, hyp, sm, id_=None):
     print_diff(sm, ref, hyp)
     if id_:
-        print(("SENTENCE %d  %s" % (counter, id_)))
+        print(('SENTENCE %d  %s' % (counter, id_)))
     else:
-        print("SENTENCE %d" % counter)
-    print("Correct          = %5.1f%%  %3d   (%6d)" % (100.0 * matches / ref_length, matches, match_count))
-    print("Errors           = %5.1f%%  %3d   (%6d)" % (100.0 * errors / ref_length, errors, error_count))
+        print('SENTENCE %d' % counter)
+    print('Correct          = %5.1f%%  %3d   (%6d)' % (100.0 * matches / ref_length, matches, match_count))
+    print('Errors           = %5.1f%%  %3d   (%6d)' % (100.0 * errors / ref_length, errors, error_count))
 
 
 def track_confusions(sm, seq1, seq2):
@@ -168,20 +168,20 @@ def print_confusions():
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
     if len(insertion_table) > 0:
-        print("INSERTIONS:")
+        print('INSERTIONS:')
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print("%20s %10d" % item)
+                print('%20s %10d' % item)
     if len(deletion_table) > 0:
-        print("DELETIONS:")
+        print('DELETIONS:')
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print("%20s %10d" % item)
+                print('%20s %10d' % item)
     if len(substitution_table) > 0:
-        print("SUBSTITUTIONS:")
+        print('SUBSTITUTIONS:')
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
-                print("%20s -> %20s   %10d" % (w1, w2, count))
+                print('%20s -> %20s   %10d' % (w1, w2, count))
 
 
 # For some reason I was getting two different counts depending on how I count the matches,
@@ -208,7 +208,7 @@ def get_error_count(sm):
 
 
 # This is long and ugly.  Perhaps we can break it up?
-def print_diff(sm, seq1, seq2):
+def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
     """Given a sequence matcher and the two sequences, print a Sphinx-style
     'diff' off the two."""
     ref_tokens = []
@@ -258,9 +258,8 @@ def print_diff(sm, seq1, seq2):
                     s2[i] = '*' * len(w1)
             ref_tokens += s1
             hyp_tokens += s2
-    print('=' * 60)
-    print("REF: %s" % ' '.join(ref_tokens))
-    print("HYP: %s" % ' '.join(hyp_tokens))
+    print('{} {}'.format(prefix1, ' '.join(ref_tokens)))
+    print('{} {}'.format(prefix2, ' '.join(hyp_tokens)))
 
 
 def mean(seq):
@@ -273,7 +272,7 @@ def print_wer_vs_length():
     values = wer_bins.values()
     avg_wers = map(lambda x: (x[0], mean(x[1])), values)
     for length, avg in sorted(avg_wers, key=lambda x: x[1]):
-        print("%5d %f" % (i, avg_wers[i]))
+        print('%5d %f' % (i, avg_wers[i]))
     print('')
 
 
@@ -288,11 +287,11 @@ def plot_wers():
     # Create a subplot.
     ax = fig.add_subplot(111)
     # Set the title.
-    ax.set_title("WER vs sentence length",fontsize=14)
+    ax.set_title('WER vs sentence length',fontsize=14)
     # Set the X Axis label.
-    ax.set_xlabel("sentence length (# of words)",fontsize=12)
+    ax.set_xlabel('sentence length (# of words)',fontsize=12)
     # Set the Y Axis label.
-    ax.set_ylabel("WER", fontsize=12)
+    ax.set_ylabel('WER', fontsize=12)
     # Display Grid.
     #ax.grid(True,linestyle='-',color='0.75')
     # Generate the Scatter Plot.
@@ -302,5 +301,5 @@ def plot_wers():
     canvas.print_figure('wer-vs-length.png', dpi=500)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
