@@ -1,14 +1,15 @@
 import sys
+
 from functools import reduce
 from collections import defaultdict
 from edit_distance import SequenceMatcher
 
 # Imports for plotting
 import matplotlib
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 import matplotlib.mlab as mlab
 import numpy
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 # For keeping track of the total number of tokens, errors, and matches
@@ -113,7 +114,6 @@ def process_line_pair(ref_line, hyp_line):
     error_rates.append(error_rate)
     wer_bins[len(ref)].append(error_rate)
 
-
 def set_global_variables(args):
     global print_instances
     global files_have_ids
@@ -138,7 +138,6 @@ def remove_sentence_ids(ref, hyp):
     hyp = hyp[:-1]
     return ref, hyp
 
-
 def print_instances(ref, hyp, sm, id_=None):
     print_diff(sm, ref, hyp)
     if id_:
@@ -147,7 +146,6 @@ def print_instances(ref, hyp, sm, id_=None):
         print('SENTENCE %d' % counter)
     print('Correct          = %5.1f%%  %3d   (%6d)' % (100.0 * matches / ref_length, matches, match_count))
     print('Errors           = %5.1f%%  %3d   (%6d)' % (100.0 * errors / ref_length, errors, error_count))
-
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -167,7 +165,6 @@ def track_confusions(sm, seq1, seq2):
                     key = (w1, w2)
                     substitution_table[key] += 1
 
-
 def print_confusions():
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
@@ -186,7 +183,6 @@ def print_confusions():
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
                 print('%20s -> %20s   %10d' % (w1, w2, count))
-
 
 # For some reason I was getting two different counts depending on how I count the matches,
 # so do an assertion in this code to make sure we're getting matching counts.
@@ -209,7 +205,6 @@ def get_error_count(sm):
     errors = [x for x in opcodes if x[0] in error_codes]
     error_lengths = [max(x[2] - x[1], x[4] - x[3]) for x in errors]
     return reduce(lambda x, y: x + y, error_lengths, 0)
-
 
 # This is long and ugly.  Perhaps we can break it up?
 def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
@@ -265,11 +260,9 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
     print('{} {}'.format(prefix1, ' '.join(ref_tokens)))
     print('{} {}'.format(prefix2, ' '.join(hyp_tokens)))
 
-
 def mean(seq):
     """Return the average of the elements of a sequence."""
     return float(sum(seq)) / len(seq) if len(seq) > 0 else float('nan')
-
 
 def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
@@ -278,7 +271,6 @@ def print_wer_vs_length():
     for length, avg in sorted(avg_wers, key=lambda x: x[1]):
         print('%5d %f' % (i, avg_wers[i]))
     print('')
-
 
 def plot_wers():
     """Plotting the results in this way is not helpful.
