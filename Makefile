@@ -12,7 +12,7 @@ doc:
 	pydoc -w `find asr_evaluation -name '*.py'`
 
 showdoc:
-	pydoc asr_evaluation/*
+	pydoc `find asr_evaluation -name '*.py'`
 
 # test:
 # 	python -m unittest discover test
