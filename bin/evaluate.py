@@ -1,5 +1,5 @@
 import argparse
-from asr_evaluation.asr_evaluation import main as other_main
+from asr_evaluation import main as other_main
 
 
 def get_parser():

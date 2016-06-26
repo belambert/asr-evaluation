@@ -2,11 +2,15 @@
 asr_evalution
 ============
 
-Python module for evaluting ASR hypotheses (i.e. word error rate and word recognition rate).
+Python module for evaluting ASR hypotheses (i.e. word error rate and word 
+recognition rate).
 
-This module depends on my editdistance project, for computing edit distances between arbitrary sequences.
+This module depends on my editdistance project, for computing edit distances 
+between arbitrary sequences.
 
-The formatting of the output of this program is very loosely based around the same idea as the align.c program commonly used within the Sphinx ASR community.  This may run a bit faster if neither instances nor confusions are printed.
+The formatting of the output of this program is very loosely based around the 
+same idea as the align.c program commonly used within the Sphinx ASR community. 
+ This may run a bit faster if neither instances nor confusions are printed.
 
 Please let me know if you have any comments, questions, or problems.
 
@@ -43,4 +47,6 @@ It should be something like this:
                             minimum word count to show a word in confusions
 ```
 
-This requires Python 2.7+ since it uses argparse for the command line interface.  The rest of the code should be OK with earlier versions of Python.  It is now Python3 compliant.
+This requires Python 2.7+ since it uses argparse for the command line 
+interface.  The rest of the code should be OK with earlier versions of Python.  
+It is now Python3 compliant.
