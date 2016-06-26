@@ -1,5 +1,7 @@
 .PHONY: test
 
+all:
+
 clean:
 	python setup.py clean
 	rm -f MANIFEST
@@ -14,5 +16,5 @@ doc:
 showdoc:
 	pydoc `find asr_evaluation -name '*.py'`
 
-# test:
-# 	python -m unittest discover test
+test:
+	python setup.py test
