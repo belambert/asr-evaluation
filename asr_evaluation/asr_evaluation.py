@@ -1,7 +1,7 @@
 import sys
 from functools import reduce
 from collections import defaultdict
-from editdistance.editdistance import SequenceMatcher
+from edit_distance import SequenceMatcher
 
 # Imports for plotting
 import matplotlib
@@ -106,8 +106,12 @@ def process_line_pair(ref_line, hyp_line):
     # Keep track of the individual error rates, and reference lengths, so we
     # can compute average WERs by sentence length
     lengths.append(ref_length)
-    error_rates.append(errors * 1.0 / len(ref))
-    wer_bins[len(ref)].append(errors * 1.0 / len(ref))
+    if len(ref) > 0:
+        error_rate = errors * 1.0 / len(ref)
+    else:
+        error_rate = float("inf")
+    error_rates.append(error_rate)
+    wer_bins[len(ref)].append(error_rate)
 
 
 def set_global_variables(args):
