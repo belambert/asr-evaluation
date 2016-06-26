@@ -6,6 +6,13 @@ clean:
 	rm -rf dist
 	rm -rf asr_evaluation.egg-info
 	rm -rf build
+	find . -name *.pyc -exec rm -rf '{}' \;
 
-test:
-	python -m unittest discover test
+doc:
+	pydoc -w `find asr_evaluation -name '*.py'`
+
+showdoc:
+	pydoc asr_evaluation/*
+
+# test:
+# 	python -m unittest discover test

@@ -47,9 +47,9 @@ def main(args):
     global ref_token_count
     global confusions
     set_global_variables(args)
-    
+
     counter = 1
-    # Loop through each line of the reference and hyp file    
+    # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in zip(args.ref, args.hyp):
         process_line_pair(ref_line, hyp_line)
         counter += 1
@@ -57,8 +57,8 @@ def main(args):
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print('WRR: %f %% (%10d / %10d)' % (100*match_count/ref_token_count, match_count, ref_token_count))
-    print('WER: %f %% (%10d / %10d)' % (100*error_count/ref_token_count, error_count, ref_token_count))
+    print('WRR: %f %% (%10d / %10d)' % (100 * match_count / ref_token_count, match_count, ref_token_count))
+    print('WER: %f %% (%10d / %10d)' % (100 * error_count / ref_token_count, error_count, ref_token_count))
 
 
 def process_line_pair(ref_line, hyp_line):
@@ -74,7 +74,7 @@ def process_line_pair(ref_line, hyp_line):
     global confusions
     global min_count
     global plot
-    
+
     ref = ref_line.split()
     hyp = hyp_line.split()
     id_ = None
@@ -240,10 +240,10 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
             s1 = list(map(str.upper, seq1[i1:i2]))
             s2 = list(map(str.upper, seq2[j1:j2]))
             if seq1_len > seq2_len:
-                for i in range(0, seq1_len-seq2_len):
+                for i in range(0, seq1_len - seq2_len):
                     s2.append(False)
             if seq1_len < seq2_len:
-                for i in range(0, seq2_len-seq1_len):
+                for i in range(0, seq2_len - seq1_len):
                     s1.append(False)
             assert(len(s1) == len(s2))
             for i in range(0, len(s1)):
@@ -252,9 +252,9 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
                 # If we have two words, make them the same length
                 if w1 and w2:
                     if len(w1) > len(w2):
-                        s2[i] = w2 + ' '*(len(w1) - len(w2))
+                        s2[i] = w2 + ' ' * (len(w1) - len(w2))
                     elif len(w1) < len(w2):
-                        s1[i] = w1 + ' '*(len(w2) - len(w1))
+                        s1[i] = w1 + ' ' * (len(w2) - len(w1))
                 # Otherwise, create an empty word of the right width
                 if not w1:
                     s1[i] = '*' * len(w2)
@@ -268,7 +268,7 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
 
 def mean(seq):
     """Return the average of the elements of a sequence."""
-    return float(sum(seq))/len(seq) if len(seq) > 0 else float('nan')
+    return float(sum(seq)) / len(seq) if len(seq) > 0 else float('nan')
 
 
 def print_wer_vs_length():
@@ -285,22 +285,22 @@ def plot_wers():
     however there are probably other useful plots we
     could use."""
     # Create a figure with size 6 x 6 inches.
-    fig = Figure(figsize=(6,6))
+    fig = Figure(figsize=(6, 6))
     # Create a canvas and add the figure to it.
     canvas = FigureCanvas(fig)
     # Create a subplot.
     ax = fig.add_subplot(111)
     # Set the title.
-    ax.set_title('WER vs sentence length',fontsize=14)
+    ax.set_title('WER vs sentence length', fontsize=14)
     # Set the X Axis label.
-    ax.set_xlabel('sentence length (# of words)',fontsize=12)
+    ax.set_xlabel('sentence length (# of words)', fontsize=12)
     # Set the Y Axis label.
     ax.set_ylabel('WER', fontsize=12)
     # Display Grid.
-    #ax.grid(True,linestyle='-',color='0.75')
+    # ax.grid(True,linestyle='-',color='0.75')
     # Generate the Scatter Plot.
-    #ax.scatter(lengths, error_rates, s=20,color='tomato');
-    ax.scatter(lengths, error_rates, color='tomato');
+    # ax.scatter(lengths, error_rates, s=20,color='tomato');
+    ax.scatter(lengths, error_rates, color='tomato')
     # Save the generated Scatter Plot to a PNG file.
     canvas.print_figure('wer-vs-length.png', dpi=500)
 
