@@ -2,6 +2,8 @@
 asr_evalution
 ============
 
+[![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=master)](https://travis-ci.org/belambert/asr-evaluation)
+
 Python module for evaluting ASR hypotheses (i.e. word error rate and word 
 recognition rate).
 
