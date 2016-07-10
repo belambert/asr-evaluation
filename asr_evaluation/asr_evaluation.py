@@ -58,8 +58,8 @@ def main(args):
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print('WRR: %f %% (%10d / %10d)' % (100 * match_count / ref_token_count, match_count, ref_token_count))
-    print('WER: %f %% (%10d / %10d)' % (100 * error_count / ref_token_count, error_count, ref_token_count))
+    print('WRR: {0:f} % ({1:10d} / {2:10d})'.format(100 * match_count / ref_token_count, match_count, ref_token_count))
+    print('WER: {0:f} % ({1:10d} / {2:10d})'.format(100 * error_count / ref_token_count, error_count, ref_token_count))
 
 
 def process_line_pair(ref_line, hyp_line):
@@ -141,11 +141,11 @@ def remove_sentence_ids(ref, hyp):
 def print_instances(ref, hyp, sm, id_=None):
     print_diff(sm, ref, hyp)
     if id_:
-        print(('SENTENCE %d  %s' % (counter, id_)))
+        print(('SENTENCE {0:d}  {1!s}'.format(counter, id_)))
     else:
-        print('SENTENCE %d' % counter)
-    print('Correct          = %5.1f%%  %3d   (%6d)' % (100.0 * matches / ref_length, matches, match_count))
-    print('Errors           = %5.1f%%  %3d   (%6d)' % (100.0 * errors / ref_length, errors, error_count))
+        print('SENTENCE {0:d}'.format(counter))
+    print('Correct          = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * matches / ref_length, matches, match_count))
+    print('Errors           = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * errors / ref_length, errors, error_count))
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -172,17 +172,17 @@ def print_confusions():
         print('INSERTIONS:')
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print('%20s %10d' % item)
+                print('{0:20!s} {1:10d}'.format(*item))
     if len(deletion_table) > 0:
         print('DELETIONS:')
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print('%20s %10d' % item)
+                print('{0:20!s} {1:10d}'.format(*item))
     if len(substitution_table) > 0:
         print('SUBSTITUTIONS:')
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
-                print('%20s -> %20s   %10d' % (w1, w2, count))
+                print('{0:20!s} -> {1:20!s}   {2:10d}'.format(w1, w2, count))
 
 # For some reason I was getting two different counts depending on how I count the matches,
 # so do an assertion in this code to make sure we're getting matching counts.
@@ -269,7 +269,7 @@ def print_wer_vs_length():
     values = wer_bins.values()
     avg_wers = map(lambda x: (x[0], mean(x[1])), values)
     for length, avg in sorted(avg_wers, key=lambda x: x[1]):
-        print('%5d %f' % (i, avg_wers[i]))
+        print('{0:5d} {1:f}'.format(i, avg_wers[i]))
     print('')
 
 def plot_wers():
