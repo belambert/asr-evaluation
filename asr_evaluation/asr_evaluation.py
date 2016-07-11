@@ -1,13 +1,9 @@
-import sys
 
 from functools import reduce
 from collections import defaultdict
 from edit_distance import SequenceMatcher
 
 # Imports for plotting
-import matplotlib
-import matplotlib.mlab as mlab
-import numpy
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -133,7 +129,6 @@ def remove_sentence_ids(ref, hyp):
     ref_id = ref[-1]
     hyp_id = hyp[-1]
     assert (ref_id == hyp_id)
-    id = ref_id
     ref = ref[:-1]
     hyp = hyp[:-1]
     return ref, hyp
