@@ -3,6 +3,8 @@ from functools import reduce
 from collections import defaultdict
 from edit_distance import SequenceMatcher
 
+from termcolor import colored
+
 # Imports for plotting
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -202,33 +204,44 @@ def get_error_count(sm):
     return reduce(lambda x, y: x + y, error_lengths, 0)
 
 # This is long and ugly.  Perhaps we can break it up?
-def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
+# It would make more sense for this to just return the two strings...
+def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suffix2=None):
     """Given a sequence matcher and the two sequences, print a Sphinx-style
     'diff' off the two."""
     ref_tokens = []
     hyp_tokens = []
     opcodes = sm.get_opcodes()
     for tag, i1, i2, j1, j2 in opcodes:
+        # If they are equal, do nothing except lowercase them
         if tag == 'equal':
             for i in range(i1, i2):
                 ref_tokens.append(seq1[i].lower())
             for i in range(j1, j2):
                 hyp_tokens.append(seq2[i].lower())
+        # For insertions and deletions, put a filler of '***' on the other one, and
+        # make the other all caps
         elif tag == 'delete':
             for i in range(i1, i2):
-                ref_tokens.append(seq1[i].upper())
+                ref_token = colored(seq1[i].upper(), 'red')
+                ref_tokens.append(ref_token)
             for i in range(i1, i2):
-                hyp_tokens.append('*' * len(seq1[i]))
+                hyp_token = colored('*' * len(seq1[i]), 'red')
+                hyp_tokens.append(hyp_token)
         elif tag == 'insert':
             for i in range(j1, j2):
-                ref_tokens.append('*' * len(seq2[i]))
+                ref_token = colored('*' * len(seq2[i]), 'red')
+                ref_tokens.append(ref_token)
             for i in range(j1, j2):
-                hyp_tokens.append(seq2[i].upper())
+                hyp_token = colored(seq2[i].upper(), 'red')
+                hyp_tokens.append(hyp_token)
+        # More complicated logic for a substitution
         elif tag == 'replace':
             seq1_len = i2 - i1
             seq2_len = j2 - j1
+            # Get a list of tokens for each
             s1 = list(map(str.upper, seq1[i1:i2]))
             s2 = list(map(str.upper, seq2[j1:j2]))
+            # Pad the two lists with False values to get them to the same length
             if seq1_len > seq2_len:
                 for i in range(0, seq1_len - seq2_len):
                     s2.append(False)
@@ -236,6 +249,7 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
                 for i in range(0, seq2_len - seq1_len):
                     s1.append(False)
             assert(len(s1) == len(s2))
+            # Pair up words with their substitutions, or fillers
             for i in range(0, len(s1)):
                 w1 = s1[i]
                 w2 = s2[i]
@@ -245,15 +259,21 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:'):
                         s2[i] = w2 + ' ' * (len(w1) - len(w2))
                     elif len(w1) < len(w2):
                         s1[i] = w1 + ' ' * (len(w2) - len(w1))
-                # Otherwise, create an empty word of the right width
+                # Otherwise, create an empty filler word of the right width
                 if not w1:
                     s1[i] = '*' * len(w2)
                 if not w2:
                     s2[i] = '*' * len(w1)
+            s1 = map(lambda x: colored(x, 'red'), s1)
+            s2 = map(lambda x: colored(x, 'red'), s2)
             ref_tokens += s1
             hyp_tokens += s2
-    print('{} {}'.format(prefix1, ' '.join(ref_tokens)))
-    print('{} {}'.format(prefix2, ' '.join(hyp_tokens)))
+    if prefix1: ref_tokens.insert(0, prefix1)
+    if prefix2: hyp_tokens.insert(0, prefix2)
+    if suffix1: ref_tokens.append(suffix1)
+    if suffix2: hyp_tokens.append(suffix2)    
+    print(' '.join(ref_tokens))
+    print(' '.join(hyp_tokens))
 
 def mean(seq):
     """Return the average of the elements of a sequence."""
