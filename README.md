@@ -27,7 +27,7 @@ For command line usage, see:
 It should be something like this:
 
 ```    
-    usage: asr_evaluation.py [-h] [-i] [-id] [-c] [-p] [-m count] ref hyp
+    usage: evaluate.py [-h] [-i] [-id] [-c] [-p] [-m count] ref hyp
     
     Evaluate an ASR transcript against a reference transcript.
     

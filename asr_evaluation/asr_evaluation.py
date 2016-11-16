@@ -310,7 +310,3 @@ def plot_wers():
     ax.scatter(lengths, error_rates, color='tomato')
     # Save the generated Scatter Plot to a PNG file.
     canvas.print_figure('wer-vs-length.png', dpi=500)
-
-
-if __name__ == '__main__':
-    main()
