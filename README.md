@@ -3,6 +3,7 @@ asr_evalution
 ============
 
 [![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=master)](https://travis-ci.org/belambert/asr-evaluation)
+[![PyPI version](https://badge.fury.io/py/asr_evaluation.svg)](https://badge.fury.io/py/asr_evaluation)
 
 Python module for evaluting ASR hypotheses (i.e. word error rate and word 
 recognition rate).
@@ -15,6 +16,24 @@ same idea as the align.c program commonly used within the Sphinx ASR community.
  This may run a bit faster if neither instances nor confusions are printed.
 
 Please let me know if you have any comments, questions, or problems.
+
+Installing & uninstalling
+-------------------------
+
+The easiest way to install is using pip:
+
+    pip install asr_evaluation
+
+Alternatively you can clone this git repo and install using distutils:
+
+    git clone git@github.com:belambert/asr-evaluation.git
+    cd asr-evaluation
+    python setup.py install
+
+To uninstall with pip:
+
+    pip uninstall asr_evaluation
+
 
 Command line usage
 ------------------
