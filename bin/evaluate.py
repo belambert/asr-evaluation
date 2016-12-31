@@ -1,6 +1,7 @@
+#!/usr/bin/env python
+
 import argparse
 from asr_evaluation import main as other_main
-
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
@@ -16,7 +17,6 @@ def get_parser():
     parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count',
                         help='Minimum word count to show a word in confusions')
     return parser
-
 
 def main():
     parser = get_parser()
