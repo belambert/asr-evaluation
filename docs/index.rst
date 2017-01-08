@@ -9,7 +9,7 @@ asr-evaluation documentation
 .. toctree::
    :maxdepth: 4
 
-.. automodule:: asr_evaluation
+.. automodule:: asr_evaluation.asr_evaluation
     :members:
     :undoc-members:
     :show-inheritance:

@@ -16,7 +16,7 @@ asr_evaluation.asr_evaluation module
 Module contents
 ---------------
 
-.. automodule:: asr_evaluation
+.. automodule:: asr_evaluation.asr_evaluation
     :members:
     :undoc-members:
     :show-inheritance:
