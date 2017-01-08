@@ -7,6 +7,9 @@ python:
   - '3.5'
   - '3.6'
   - nightly
+matrix:
+  allow_failures:
+  - python: '2.7'
 script: nosetests
 deploy:
   provider: pypi
