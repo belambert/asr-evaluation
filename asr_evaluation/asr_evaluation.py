@@ -211,7 +211,7 @@ def get_error_count(sm):
     error_lengths = [max(x[2] - x[1], x[4] - x[3]) for x in errors]
     return reduce(lambda x, y: x + y, error_lengths, 0)
 
-# This is long and ugly.  Perhaps we can break it up?
+# TODO - This is long and ugly.  Perhaps we can break it up?
 # It would make more sense for this to just return the two strings...
 def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suffix2=None):
     """Given a sequence matcher and the two sequences, print a Sphinx-style
@@ -290,9 +290,9 @@ def mean(seq):
 def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
     values = wer_bins.values()
-    avg_wers = map(lambda x: (x[0], mean(x[1])), values)
-    for length, avg in sorted(avg_wers, key=lambda x: x[1]):
-        print('{0:5d} {1:f}'.format(i, avg_wers[i]))
+    avg_wers = list(map(lambda x: (x[0], mean(x[1])), values))
+    for length, _ in sorted(avg_wers, key=lambda x: x[1]):
+        print('{0:5d} {1:f}'.format(length, avg_wers[length]))
     print('')
 
 def plot_wers():
