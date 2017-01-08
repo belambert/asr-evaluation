@@ -1,9 +1,13 @@
 #!/usr/bin/env python
+"""
+Contains the main method for the CLI.
+"""
 
 import argparse
 from asr_evaluation.asr_evaluation import main as other_main
 
 def get_parser():
+    """Parse the CLI args."""
     parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
     parser.add_argument('ref', type=argparse.FileType('r'), help='Reference transcript filename')
     parser.add_argument('hyp', type=argparse.FileType('r'), help='ASR hypothesis filename')
@@ -19,6 +23,7 @@ def get_parser():
     return parser
 
 def main():
+    """Run the program."""
     parser = get_parser()
     args = parser.parse_args()
     other_main(args)

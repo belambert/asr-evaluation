@@ -1,3 +1,6 @@
+"""
+Primary code for computing word error rate and other metrics from ASR output.
+"""
 
 from functools import reduce
 from collections import defaultdict
@@ -11,6 +14,10 @@ from matplotlib.figure import Figure
 
 # Some defaults
 print_instances_p = False
+files_have_ids = False
+confusions = False
+min_count = 0
+plot = False
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
@@ -33,26 +40,6 @@ substitution_table = defaultdict(int)
 error_codes = ['replace', 'delete', 'insert']
 
 
-def get_parser():
-    parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
-    parser.add_argument('ref', type=argparse.FileType('r'), help='Reference transcript filename')
-    parser.add_argument('hyp', type=argparse.FileType('r'), help='ASR hypothesis filename')
-    parser.add_argument('-i', '--print-instances', action='store_true',
-                        help='Print the individual sentences and their errors')
-    parser.add_argument('-id', '--has-ids', action='store_true',
-                        help='Hypothesis and reference files have ids in the last token?')
-    parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused')
-    parser.add_argument('-p', '--print-wer-vs-length', action='store_true',
-                        help='Print table of average WER grouped by reference sentence length')
-    parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count',
-                        help='Minimum word count to show a word in confusions')
-    return parser
-
-def cli():
-    parser = get_parser()
-    args = parser.parse_args()
-    main(args)
-
 # TODO - rename this function.  Move some of it into evaluate.py?
 def main(args):
     """Main method - this reads the hyp and ref files, and creates
@@ -64,10 +51,6 @@ def main(args):
     hypothesis file have the same number of lines.  It will stop after the
     shortest one runs out of lines.  This should be easy to fix...
     """
-    global error_count
-    global match_count
-    global ref_token_count
-    global confusions
     set_global_variables(args)
 
     counter = 1
@@ -91,11 +74,6 @@ def process_line_pair(ref_line, hyp_line):
     global error_count
     global match_count
     global ref_token_count
-    global print_instances
-    global files_have_ids
-    global confusions
-    global min_count
-    global plot
 
     ref = ref_line.split()
     hyp = hyp_line.split()
@@ -136,6 +114,7 @@ def process_line_pair(ref_line, hyp_line):
     wer_bins[len(ref)].append(error_rate)
 
 def set_global_variables(args):
+    """Copy argparse args into global variables."""
     global print_instances_p
     global files_have_ids
     global confusions
@@ -153,19 +132,22 @@ def remove_sentence_ids(ref, hyp):
     in Sphinx but not in Kaldi."""
     ref_id = ref[-1]
     hyp_id = hyp[-1]
-    assert (ref_id == hyp_id)
+    assert ref_id == hyp_id
     ref = ref[:-1]
     hyp = hyp[:-1]
     return ref, hyp
 
 def print_instances(ref, hyp, sm, id_=None):
+    """Print a single instance of a ref/hyp pair."""
     print_diff(sm, ref, hyp)
     if id_:
         print(('SENTENCE {0:d}  {1!s}'.format(counter, id_)))
     else:
         print('SENTENCE {0:d}'.format(counter))
-    print('Correct          = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.matches() / len(ref), sm.matches(), len(ref)))
-    print('Errors           = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.distance() / len(ref), sm.distance(), len(ref)))
+    print('Correct          = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.matches() / len(ref),
+                                                                   sm.matches(), len(ref)))
+    print('Errors           = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.distance() / len(ref),
+                                                                   sm.distance(), len(ref)))
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -216,7 +198,7 @@ def get_match_count(sm):
     matches1 = sm.matches()
     matching_blocks = sm.get_matching_blocks()
     matches2 = reduce(lambda x, y: x + y, [x[2] for x in matching_blocks], 0)
-    assert(matches1 == matches2)
+    assert matches1 == matches2
     matches = matches1
     return matches
 
@@ -274,7 +256,7 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
             if seq1_len < seq2_len:
                 for i in range(0, seq2_len - seq1_len):
                     s1.append(False)
-            assert(len(s1) == len(s2))
+            assert len(s1) == len(s2)
             # Pair up words with their substitutions, or fillers
             for i in range(0, len(s1)):
                 w1 = s1[i]
@@ -297,7 +279,7 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
     if prefix1: ref_tokens.insert(0, prefix1)
     if prefix2: hyp_tokens.insert(0, prefix2)
     if suffix1: ref_tokens.append(suffix1)
-    if suffix2: hyp_tokens.append(suffix2)    
+    if suffix2: hyp_tokens.append(suffix2)
     print(' '.join(ref_tokens))
     print(' '.join(hyp_tokens))
 
