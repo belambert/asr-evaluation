@@ -9,11 +9,14 @@ from termcolor import colored
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+# Some defaults
+print_instances_p = False
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
 error_count = 0
 match_count = 0
+counter = 0
 
 # For keeping track of word error rates by sentence length
 # this is so we can see if performance is better/worse for longer
@@ -29,6 +32,26 @@ substitution_table = defaultdict(int)
 # These are the editdistance opcodes that are condsidered 'errors'
 error_codes = ['replace', 'delete', 'insert']
 
+
+def get_parser():
+    parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
+    parser.add_argument('ref', type=argparse.FileType('r'), help='Reference transcript filename')
+    parser.add_argument('hyp', type=argparse.FileType('r'), help='ASR hypothesis filename')
+    parser.add_argument('-i', '--print-instances', action='store_true',
+                        help='Print the individual sentences and their errors')
+    parser.add_argument('-id', '--has-ids', action='store_true',
+                        help='Hypothesis and reference files have ids in the last token?')
+    parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused')
+    parser.add_argument('-p', '--print-wer-vs-length', action='store_true',
+                        help='Print table of average WER grouped by reference sentence length')
+    parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count',
+                        help='Minimum word count to show a word in confusions')
+    return parser
+
+def cli():
+    parser = get_parser()
+    args = parser.parse_args()
+    main(args)
 
 # TODO - rename this function.  Move some of it into evaluate.py?
 def main(args):
@@ -99,7 +122,7 @@ def process_line_pair(ref_line, hyp_line):
         track_confusions(sm, ref, hyp)
 
     # If we're printing instances, do it here (in roughly the align.c format)
-    if print_instances:
+    if print_instances_p:
         print_instances(ref, hyp, sm, id_=id_)
 
     # Keep track of the individual error rates, and reference lengths, so we
@@ -113,13 +136,13 @@ def process_line_pair(ref_line, hyp_line):
     wer_bins[len(ref)].append(error_rate)
 
 def set_global_variables(args):
-    global print_instances
+    global print_instances_p
     global files_have_ids
     global confusions
     global min_count
     global plot
     # Put the command line options into global variables.
-    print_instances = args.print_instances
+    print_instances_p = args.print_instances
     files_have_ids = args.has_ids
     confusions = args.confusions
     min_count = args.min_word_count
@@ -141,8 +164,8 @@ def print_instances(ref, hyp, sm, id_=None):
         print(('SENTENCE {0:d}  {1!s}'.format(counter, id_)))
     else:
         print('SENTENCE {0:d}'.format(counter))
-    print('Correct          = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * matches / ref_length, matches, match_count))
-    print('Errors           = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * errors / ref_length, errors, error_count))
+    print('Correct          = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.matches() / len(ref), sm.matches(), len(ref)))
+    print('Errors           = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.distance() / len(ref), sm.distance(), len(ref)))
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -169,17 +192,20 @@ def print_confusions():
         print('INSERTIONS:')
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print('{0:20!s} {1:10d}'.format(*item))
+                #print('{0:20!s} {1:10d}'.format(*item))
+                print('{0:20s} {1:10d}'.format(*item))
     if len(deletion_table) > 0:
         print('DELETIONS:')
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                print('{0:20!s} {1:10d}'.format(*item))
+                # print('{0:20!s} {1:10d}'.format(*item))
+                print('{0:20s} {1:10d}'.format(*item))
     if len(substitution_table) > 0:
         print('SUBSTITUTIONS:')
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
-                print('{0:20!s} -> {1:20!s}   {2:10d}'.format(w1, w2, count))
+                #print('{0:20!s} -> {1:20!s}   {2:10d}'.format(w1, w2, count))
+                print('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
 
 # For some reason I was getting two different counts depending on how I count the matches,
 # so do an assertion in this code to make sure we're getting matching counts.

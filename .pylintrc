@@ -1,0 +1,16 @@
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable = global-statement, fixme
+
+[BASIC]
+# Regular expression which should only match correct argument names
+argument-rgx=[a-z_][a-z0-9_]{0,30}$
+
+# Regular expression which should only match correct variable names
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+
+# I have a bunch of global variables that it thinks are constants.
+# This is just to squash those warnings
+const-rgx=[a-zA-Z0-9_]{1,30}$

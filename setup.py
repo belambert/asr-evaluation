@@ -9,5 +9,11 @@ setup(
     license='LICENSE.txt',
     description='Evaluating ASR (automatic speech recognition) hypotheses, i.e. computing word error rate.',
     install_requires=['edit_distance', 'termcolor', 'matplotlib'],
-    scripts=['bin/evaluate.py']
+    test_suite='test.test.TestASREvaluation',
+    #scripts=['bin/evaluate.py'],
+    entry_points={
+        'console_scripts': [
+            'evaluate = asr_evaluation.__main__:main'
+        ]
+    },
 )
