@@ -1,6 +1,7 @@
 """
 Primary code for computing word error rate and other metrics from ASR output.
 """
+from __future__ import division
 
 from functools import reduce
 from collections import defaultdict
@@ -62,8 +63,8 @@ def main(args):
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print('WRR: {0:f} % ({1:10d} / {2:10d})'.format(100 * match_count / ref_token_count, match_count, ref_token_count))
-    print('WER: {0:f} % ({1:10d} / {2:10d})'.format(100 * error_count / ref_token_count, error_count, ref_token_count))
+    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(match_count / ref_token_count, match_count, ref_token_count))
+    print('WER: {:10.3%} ({:10d} / {:10d})'.format(error_count / ref_token_count, error_count, ref_token_count))
 
 
 def process_line_pair(ref_line, hyp_line):
