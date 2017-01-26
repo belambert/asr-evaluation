@@ -1,6 +1,6 @@
-============
-asr_evalution
-============
+==============
+asr_evaluation
+==============
 
 [![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=master)](https://travis-ci.org/belambert/asr-evaluation)
 [![PyPI version](https://badge.fury.io/py/asr_evaluation.svg)](https://badge.fury.io/py/asr_evaluation)
