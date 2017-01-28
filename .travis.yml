@@ -1,4 +1,5 @@
 language: python
+sudo: true
 python:
   - '2.7'
   - '3.2'
@@ -7,11 +8,9 @@ python:
   - '3.5'
   - '3.6'
   - nightly
-matrix:
-  allow_failures:
-  - python: '2.7'
-env:
-  - PYTHONPATH="."
+# matrix:
+#   allow_failures:
+#   - python: '2.7'
 # addons.apt.packages:
 #   - python3-matplotlib
 before_install:
