@@ -4,7 +4,10 @@ Contains the main method for the CLI.
 """
 
 import argparse
-from asr_evaluation.asr_evaluation import main as other_main
+try:
+    from asr_evaluation.asr_evaluation import main as other_main
+except:
+    from asr_evaluation import main as other_main
 
 def get_parser():
     """Parse the CLI args."""
