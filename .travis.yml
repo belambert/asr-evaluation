@@ -10,6 +10,8 @@ python:
 matrix:
   allow_failures:
   - python: '2.7'
+env:
+  - PYTHONPATH="."
 addons.apt.packages:
   - python3-matplotlib
 script: nosetests
