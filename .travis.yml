@@ -14,7 +14,7 @@ python:
 # addons.apt.packages:
 #   - python3-matplotlib
 before_install:
-  - sudo apt-get install python3-matplotlib
+  - sudo apt-get install python-matplotlib
 script: nosetests
 deploy:
   provider: pypi
