@@ -8,13 +8,10 @@ python:
   - '3.5'
   - '3.6'
   - nightly
-# matrix:
-#   allow_failures:
-#   - python: '2.7'
-# addons.apt.packages:
-#   - python3-matplotlib
-before_install:
-  - sudo apt-get install python-matplotlib
+matrix:
+  allow_failures:
+  - python: '3.2'
+  - python: '3.3'
 script: nosetests
 deploy:
   provider: pypi
