@@ -12,8 +12,10 @@ matrix:
   - python: '2.7'
 env:
   - PYTHONPATH="."
-addons.apt.packages:
-  - python3-matplotlib
+# addons.apt.packages:
+#   - python3-matplotlib
+before_install:
+  - sudo apt-get install python3-matplotlib
 script: nosetests
 deploy:
   provider: pypi

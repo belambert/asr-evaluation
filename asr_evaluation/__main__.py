@@ -4,6 +4,8 @@ Contains the main method for the CLI.
 """
 
 import argparse
+
+# For some reason Python 2 and Python 3 disagree about how to import this.
 try:
     from asr_evaluation.asr_evaluation import main as other_main
 except:
