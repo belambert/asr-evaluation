@@ -4,6 +4,7 @@ asr_evaluation
 
 [![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=master)](https://travis-ci.org/belambert/asr-evaluation)
 [![PyPI version](https://badge.fury.io/py/asr_evaluation.svg)](https://badge.fury.io/py/asr_evaluation)
+[![Coverage Status](https://coveralls.io/repos/github/belambert/asr-evaluation/badge.svg?branch=master)](https://coveralls.io/github/belambert/asr-evaluation?branch=master)
 
 Python module for evaluting ASR hypotheses (i.e. word error rate and word 
 recognition rate).
