@@ -1,5 +1,4 @@
 language: python
-sudo: true
 python:
   - '2.7'
   - '3.2'
@@ -8,10 +7,6 @@ python:
   - '3.5'
   - '3.6'
   - nightly
-matrix:
-  allow_failures:
-  - python: '3.2'
-  - python: '3.3'
 script: nosetests
 deploy:
   provider: pypi
