@@ -22,7 +22,7 @@ Installing & uninstalling
 
 The easiest way to install is using pip:
 
-    pip install asr_evaluation
+    pip install asr-evaluation
 
 Alternatively you can clone this git repo and install using distutils:
 
@@ -32,7 +32,7 @@ Alternatively you can clone this git repo and install using distutils:
 
 To uninstall with pip:
 
-    pip uninstall asr_evaluation
+    pip uninstall asr-evaluation
 
 
 Command line usage
@@ -68,6 +68,3 @@ It should be something like this:
                             minimum word count to show a word in confusions
 ```
 
-This requires Python 2.7+ since it uses argparse for the command line 
-interface.  The rest of the code should be OK with earlier versions of Python.  
-It is now Python3 compliant.

@@ -2,13 +2,13 @@ from setuptools import setup
 
 setup(
     name='asr_evaluation',
-    version='1.0.0',
+    version='1.0.1',
     author='Ben Lambert',
     author_email='ben@benjaminlambert.com',
     packages=['asr_evaluation'],
     license='LICENSE.txt',
     description='Evaluating ASR (automatic speech recognition) hypotheses, i.e. computing word error rate.',
-    install_requires=['edit_distance', 'termcolor', 'matplotlib'],
+    install_requires=['edit_distance', 'termcolor'],
     test_suite='test.test.TestASREvaluation',
     entry_points={
         'console_scripts': [

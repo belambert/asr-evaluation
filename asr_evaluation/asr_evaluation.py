@@ -9,10 +9,6 @@ from edit_distance import SequenceMatcher
 
 from termcolor import colored
 
-# Imports for plotting
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-
 # Some defaults
 print_instances_p = False
 files_have_ids = False
@@ -52,6 +48,7 @@ def main(args):
     hypothesis file have the same number of lines.  It will stop after the
     shortest one runs out of lines.  This should be easy to fix...
     """
+    global counter
     set_global_variables(args)
 
     counter = 1
@@ -82,7 +79,7 @@ def process_line_pair(ref_line, hyp_line):
 
     # If the files have IDs, then split the ID off from the text
     if files_have_ids:
-        remove_sentence_ids(ref, hyp)
+        ref, hyp = remove_sentence_ids(ref, hyp)
 
     # Create an object to get the edit distance, and then retrieve the
     # relevant counts that we need.
@@ -145,10 +142,18 @@ def print_instances(ref, hyp, sm, id_=None):
         print(('SENTENCE {0:d}  {1!s}'.format(counter, id_)))
     else:
         print('SENTENCE {0:d}'.format(counter))
-    print('Correct          = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.matches() / len(ref),
-                                                                   sm.matches(), len(ref)))
-    print('Errors           = {0:5.1f}%  {1:3d}   ({2:6d})'.format(100.0 * sm.distance() / len(ref),
-                                                                   sm.distance(), len(ref)))
+    # Handle cases where the reference is empty without dying
+    if len(ref) != 0:
+        correct_rate = sm.matches() / len(ref)
+        error_rate = sm.distance() / len(ref)
+    elif sm.matches() == 0:
+        correct_rate = 1.0
+        error_rate = 0.0
+    else:
+        correct_rate = 0.0
+        error_rate = sm.matches()
+    print('Correct          = {0:6.1%}  {1:3d}   ({2:6d})'.format(correct_rate, sm.matches(), len(ref)))
+    print('Errors           = {0:6.1%}  {1:3d}   ({2:6d})'.format(error_rate, sm.distance(), len(ref)))
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -295,27 +300,3 @@ def print_wer_vs_length():
     for length, _ in sorted(avg_wers, key=lambda x: x[1]):
         print('{0:5d} {1:f}'.format(length, avg_wers[length]))
     print('')
-
-def plot_wers():
-    """Plotting the results in this way is not helpful.
-    however there are probably other useful plots we
-    could use."""
-    # Create a figure with size 6 x 6 inches.
-    fig = Figure(figsize=(6, 6))
-    # Create a canvas and add the figure to it.
-    canvas = FigureCanvas(fig)
-    # Create a subplot.
-    ax = fig.add_subplot(111)
-    # Set the title.
-    ax.set_title('WER vs sentence length', fontsize=14)
-    # Set the X Axis label.
-    ax.set_xlabel('sentence length (# of words)', fontsize=12)
-    # Set the Y Axis label.
-    ax.set_ylabel('WER', fontsize=12)
-    # Display Grid.
-    # ax.grid(True,linestyle='-',color='0.75')
-    # Generate the Scatter Plot.
-    # ax.scatter(lengths, error_rates, s=20,color='tomato');
-    ax.scatter(lengths, error_rates, color='tomato')
-    # Save the generated Scatter Plot to a PNG file.
-    canvas.print_figure('wer-vs-length.png', dpi=500)

@@ -1,3 +1,2 @@
 edit_distance
-matplotlib
 termcolor
