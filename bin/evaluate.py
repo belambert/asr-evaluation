@@ -16,6 +16,10 @@ def get_parser():
                         help='Print table of average WER grouped by reference sentence length')
     parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count',
                         help='Minimum word count to show a word in confusions')
+    parser.add_argument('-a', '--case-insensitive', default=False, action='store_true',
+                        help='Down-case the text before running the evaluation.')
+    parser.add_argument('-e', '--remove-empty-refs', default=False, action='store_true',
+                        help='Skip over any examples where the reference is empty.')
     return parser
 
 def main():

@@ -54,32 +54,52 @@ def main(args):
     counter = 1
     # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in zip(args.ref, args.hyp):
-        process_line_pair(ref_line, hyp_line)
-        counter += 1
+        processed_p = process_line_pair(ref_line, hyp_line, case_insensitive=args.case_insensitive,
+                                        remove_empty_refs=args.remove_empty_refs)
+        if processed_p:
+            counter += 1
     if confusions:
         print_confusions()
     if wer_vs_length:
         print_wer_vs_length()
-    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(match_count / ref_token_count, match_count, ref_token_count))
-    print('WER: {:10.3%} ({:10d} / {:10d})'.format(error_count / ref_token_count, error_count, ref_token_count))
+    if ref_token_count > 0:
+        wrr = match_count / ref_token_count
+        wer = error_count / ref_token_count
+    else:
+        wrr = 0.0
+        wer = 0.0
+    print('Line count: {}'.format(counter))
+    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
+    print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
 
 
-def process_line_pair(ref_line, hyp_line):
+def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
     """Given a pair of strings corresponding to a reference and hypothesis,
     compute the edit distance, print if desired, and keep track of results
-    in global variables."""
+    in global variables.
+
+    Return true if the pair was counted, false if the pair was not counted due
+    to an empty reference string."""
     # I don't believe these all need to be global.  In any case, they shouldn't be.
     global error_count
     global match_count
     global ref_token_count
 
+    # Split into tokens by whitespace
     ref = ref_line.split()
     hyp = hyp_line.split()
     id_ = None
 
     # If the files have IDs, then split the ID off from the text
     if files_have_ids:
+        id_ = ref[-1]
         ref, hyp = remove_sentence_ids(ref, hyp)
+
+    if case_insensitive:
+        ref = list(map(str.lower, ref))
+        hyp = list(map(str.lower, hyp))
+    if remove_empty_refs and len(ref) == 0:
+        return False
 
     # Create an object to get the edit distance, and then retrieve the
     # relevant counts that we need.
@@ -110,6 +130,7 @@ def process_line_pair(ref_line, hyp_line):
         error_rate = float("inf")
     error_rates.append(error_rate)
     wer_bins[len(ref)].append(error_rate)
+    return True
 
 def set_global_variables(args):
     """Copy argparse args into global variables."""
@@ -130,7 +151,11 @@ def remove_sentence_ids(ref, hyp):
     in Sphinx but not in Kaldi."""
     ref_id = ref[-1]
     hyp_id = hyp[-1]
-    assert ref_id == hyp_id
+    if ref_id != hyp_id:
+        print('Reference and hypothesis IDs do not match! '
+              'ref="{}" hyp="{}"\n'
+              'File lines in hyp file should match those in the ref file.'.format(ref_id, hyp_id))
+        exit(-1)
     ref = ref[:-1]
     hyp = hyp[:-1]
     return ref, hyp
@@ -180,24 +205,21 @@ def print_confusions():
         print('INSERTIONS:')
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                #print('{0:20!s} {1:10d}'.format(*item))
                 print('{0:20s} {1:10d}'.format(*item))
     if len(deletion_table) > 0:
         print('DELETIONS:')
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] > min_count:
-                # print('{0:20!s} {1:10d}'.format(*item))
                 print('{0:20s} {1:10d}'.format(*item))
     if len(substitution_table) > 0:
         print('SUBSTITUTIONS:')
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count > min_count:
-                #print('{0:20!s} -> {1:20!s}   {2:10d}'.format(w1, w2, count))
                 print('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
 
-# For some reason I was getting two different counts depending on how I count the matches,
+# TODO - For some reason I was getting two different counts depending on how I count the matches,
 # so do an assertion in this code to make sure we're getting matching counts.
-# This might slow things down?
+# This might slow things down.
 def get_match_count(sm):
     "Return the number of matches, given a sequence matcher object."
     matches = None
