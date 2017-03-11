@@ -14,7 +14,7 @@ print_instances_p = False
 files_have_ids = False
 confusions = False
 min_count = 0
-plot = False
+wer_vs_length_p = True
 
 # For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
@@ -60,7 +60,7 @@ def main(args):
             counter += 1
     if confusions:
         print_confusions()
-    if wer_vs_length:
+    if wer_vs_length_p:
         print_wer_vs_length()
     if ref_token_count > 0:
         wrr = match_count / ref_token_count
@@ -138,13 +138,13 @@ def set_global_variables(args):
     global files_have_ids
     global confusions
     global min_count
-    global plot
+    global wer_vs_length_p 
     # Put the command line options into global variables.
     print_instances_p = args.print_instances
     files_have_ids = args.has_ids
     confusions = args.confusions
     min_count = args.min_word_count
-    plot = args.print_wer_vs_length
+    wer_vs_length_p = args.print_wer_vs_length
 
 def remove_sentence_ids(ref, hyp):
     """Assumes that the ID is the final token of the string which is common
