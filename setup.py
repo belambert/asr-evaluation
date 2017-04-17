@@ -1,8 +1,10 @@
 from setuptools import setup
 
+version='1.2.1'
+
 setup(
     name='asr_evaluation',
-    version='1.2.0',
+    version=version,
     author='Ben Lambert',
     author_email='ben@benjaminlambert.com',
     packages=['asr_evaluation'],
