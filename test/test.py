@@ -51,4 +51,3 @@ class TestASREvaluation(unittest.TestCase):
     def test_cli8(self):
         sys.argv = ['evaluate.py', 'requirements.txt', 'requirements.txt', '-id']
         __main__.main()
-    
