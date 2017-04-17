@@ -16,15 +16,18 @@ def get_parser():
     parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
     parser.add_argument('ref', type=argparse.FileType('r'), help='Reference transcript filename')
     parser.add_argument('hyp', type=argparse.FileType('r'), help='ASR hypothesis filename')
-    parser.add_argument('-i', '--print-instances', action='store_true',
-                        help='Print the individual sentences and their errors')
+    print_args = parser.add_mutually_exclusive_group()
+    print_args.add_argument('-i', '--print-instances', action='store_true',
+                            help='Print all individual sentences and their errors.')
+    print_args.add_argument('-r', '--print-errors', action='store_true',
+                            help='Print all individual sentences that contain errors.')    
     parser.add_argument('-id', '--has-ids', action='store_true',
                         help='Hypothesis and reference files have ids in the last token?')
-    parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused')
+    parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused.')
     parser.add_argument('-p', '--print-wer-vs-length', action='store_true',
-                        help='Print table of average WER grouped by reference sentence length')
+                        help='Print table of average WER grouped by reference sentence length.')
     parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count',
-                        help='Minimum word count to show a word in confusions')
+                        help='Minimum word count to show a word in confusions.')
     parser.add_argument('-a', '--case-insensitive', action='store_true',
                         help='Down-case the text before running the evaluation.')
     parser.add_argument('-e', '--remove-empty-refs', action='store_true',

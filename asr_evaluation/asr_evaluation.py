@@ -11,6 +11,7 @@ from termcolor import colored
 
 # Some defaults
 print_instances_p = False
+print_errors_p = False
 files_have_ids = False
 confusions = False
 min_count = 0
@@ -52,7 +53,7 @@ def main(args):
     global counter
     set_global_variables(args)
 
-    counter = 1
+    counter = 0
     # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in zip(args.ref, args.hyp):
         processed_p = process_line_pair(ref_line, hyp_line, case_insensitive=args.case_insensitive,
@@ -130,7 +131,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
         track_confusions(sm, ref, hyp)
 
     # If we're printing instances, do it here (in roughly the align.c format)
-    if print_instances_p:
+    if print_instances_p or (print_errors_p and errors != 0):
         print_instances(ref, hyp, sm, id_=id_)
 
     # Keep track of the individual error rates, and reference lengths, so we
@@ -147,12 +148,14 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
 def set_global_variables(args):
     """Copy argparse args into global variables."""
     global print_instances_p
+    global print_errors_p
     global files_have_ids
     global confusions
     global min_count
     global wer_vs_length_p
     # Put the command line options into global variables.
     print_instances_p = args.print_instances
+    print_errors_p = args.print_errors
     files_have_ids = args.has_ids
     confusions = args.confusions
     min_count = args.min_word_count
@@ -176,9 +179,9 @@ def print_instances(ref, hyp, sm, id_=None):
     """Print a single instance of a ref/hyp pair."""
     print_diff(sm, ref, hyp)
     if id_:
-        print(('SENTENCE {0:d}  {1!s}'.format(counter, id_)))
+        print(('SENTENCE {0:d}  {1!s}'.format(counter+1, id_)))
     else:
-        print('SENTENCE {0:d}'.format(counter))
+        print('SENTENCE {0:d}'.format(counter+1))
     # Handle cases where the reference is empty without dying
     if len(ref) != 0:
         correct_rate = sm.matches() / len(ref)
