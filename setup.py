@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='asr_evaluation',
-    version='1.1.0',
+    version='1.2.0',
     author='Ben Lambert',
     author_email='ben@benjaminlambert.com',
     packages=['asr_evaluation'],

@@ -21,6 +21,7 @@ ref_token_count = 0
 error_count = 0
 match_count = 0
 counter = 0
+sent_error_count = 0
 
 # For keeping track of word error rates by sentence length
 # this is so we can see if performance is better/worse for longer
@@ -62,15 +63,22 @@ def main(args):
         print_confusions()
     if wer_vs_length_p:
         print_wer_vs_length()
+    # Compute WER and WRR
     if ref_token_count > 0:
         wrr = match_count / ref_token_count
         wer = error_count / ref_token_count
     else:
         wrr = 0.0
         wer = 0.0
-    print('Line count: {}'.format(counter))
-    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
+    # Compute SER
+    if counter > 0:
+        ser = sent_error_count / counter
+    else:
+        ser = 0.0
+    print('Sentence count: {}'.format(counter))
     print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
+    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
+    print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
 
 
 def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
@@ -84,6 +92,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     global error_count
     global match_count
     global ref_token_count
+    global sent_error_count
 
     # Split into tokens by whitespace
     ref = ref_line.split()
@@ -113,6 +122,9 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     match_count += matches
     ref_token_count += ref_length
 
+    if error_count != 0:
+        sent_error_count += 1
+
     # If we're keeping track of which words get mixed up with which others, call track_confusions
     if confusions:
         track_confusions(sm, ref, hyp)
@@ -138,7 +150,7 @@ def set_global_variables(args):
     global files_have_ids
     global confusions
     global min_count
-    global wer_vs_length_p 
+    global wer_vs_length_p
     # Put the command line options into global variables.
     print_instances_p = args.print_instances
     files_have_ids = args.has_ids
