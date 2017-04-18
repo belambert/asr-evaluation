@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version='1.2.1'
+version='2.0.0'
 
 setup(
     name='asr_evaluation',
@@ -14,7 +14,7 @@ setup(
     test_suite='test.test.TestASREvaluation',
     entry_points={
         'console_scripts': [
-            'evaluate.py = asr_evaluation.__main__:main'
+            'wer = asr_evaluation.__main__:main'
         ]
     }
 )
