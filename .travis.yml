@@ -8,9 +8,10 @@ python:
   - '3.6'
   - nightly
 install:
-- pip install coverage==3.7.1 codecov coveralls
+- pip install coverage==3.7.1 codecov coveralls flake8
 script:
 - python setup.py test
+- flake8 asr_evaluation bin
 - python -m coverage run --source asr_evaluation setup.py test
 after_success:
 - coveralls

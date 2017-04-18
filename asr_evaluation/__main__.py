@@ -20,7 +20,7 @@ def get_parser():
     print_args.add_argument('-i', '--print-instances', action='store_true',
                             help='Print all individual sentences and their errors.')
     print_args.add_argument('-r', '--print-errors', action='store_true',
-                            help='Print all individual sentences that contain errors.')    
+                            help='Print all individual sentences that contain errors.')
     parser.add_argument('-id', '--has-ids', action='store_true',
                         help='Hypothesis and reference files have ids in the last token?')
     parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused.')
