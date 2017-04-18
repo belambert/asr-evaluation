@@ -40,13 +40,13 @@ Command line usage
 
 For command line usage, see:
 ```
-    python bin/evaluate.py --help
+    wer --help
 ```
 
-It should be something like this:
+It should display something like this:
 
 ```    
-usage: evaluate.py [-h] [-i] [-id] [-c] [-p] [-m count] [-a] [-e] ref hyp
+usage: wer [-h] [-i | -r] [-id] [-c] [-p] [-m count] [-a] [-e] ref hyp
 
 Evaluate an ASR transcript against a reference transcript.
 
@@ -57,15 +57,16 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -i, --print-instances
-                        Print the individual sentences and their errors
+                        Print all individual sentences and their errors.
+  -r, --print-errors    Print all individual sentences that contain errors.
   -id, --has-ids        Hypothesis and reference files have ids in the last
                         token?
-  -c, --confusions      Print tables of which words were confused
+  -c, --confusions      Print tables of which words were confused.
   -p, --print-wer-vs-length
                         Print table of average WER grouped by reference
-                        sentence length
+                        sentence length.
   -m count, --min-word-count count
-                        Minimum word count to show a word in confusions
+                        Minimum word count to show a word in confusions.
   -a, --case-insensitive
                         Down-case the text before running the evaluation.
   -e, --remove-empty-refs
