@@ -15,6 +15,7 @@ script:
 - python -m coverage run --source asr_evaluation setup.py test
 after_success:
 - coveralls
+- codecov
 deploy:
   provider: pypi
   user: benlambert
