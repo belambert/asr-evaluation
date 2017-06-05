@@ -12,7 +12,8 @@ from termcolor import colored
 # Some defaults
 print_instances_p = False
 print_errors_p = False
-files_have_ids = False
+files_head_ids = False
+files_tail_ids = False
 confusions = False
 min_count = 0
 wer_vs_length_p = True
@@ -101,9 +102,12 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     id_ = None
 
     # If the files have IDs, then split the ID off from the text
-    if files_have_ids:
+    if files_head_ids:
+        id_ = ref[0]
+        ref, hyp = remove_head_id(ref, hyp)
+    elif files_tail_ids:
         id_ = ref[-1]
-        ref, hyp = remove_sentence_ids(ref, hyp)
+        ref, hyp = remove_tail_id(ref, hyp)
 
     if case_insensitive:
         ref = list(map(str.lower, ref))
@@ -149,19 +153,35 @@ def set_global_variables(args):
     """Copy argparse args into global variables."""
     global print_instances_p
     global print_errors_p
-    global files_have_ids
+    global files_head_ids
+    global files_tail_ids
     global confusions
     global min_count
     global wer_vs_length_p
     # Put the command line options into global variables.
     print_instances_p = args.print_instances
     print_errors_p = args.print_errors
-    files_have_ids = args.has_ids
+    files_head_ids = args.head_ids
+    files_tail_ids = args.tail_ids
     confusions = args.confusions
     min_count = args.min_word_count
     wer_vs_length_p = args.print_wer_vs_length
 
-def remove_sentence_ids(ref, hyp):
+def remove_head_id(ref, hyp):
+    """Assumes that the ID is the begin token of the string which is common
+    in Kaldi but not in Sphinx."""
+    ref_id = ref[0]
+    hyp_id = hyp[0]
+    if ref_id != hyp_id:
+        print('Reference and hypothesis IDs do not match! '
+              'ref="{}" hyp="{}"\n'
+              'File lines in hyp file should match those in the ref file.'.format(ref_id, hyp_id))
+        exit(-1)
+    ref = ref[1:]
+    hyp = hyp[1:]
+    return ref, hyp
+
+def remove_tail_id(ref, hyp):
     """Assumes that the ID is the final token of the string which is common
     in Sphinx but not in Kaldi."""
     ref_id = ref[-1]

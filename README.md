@@ -59,8 +59,10 @@ optional arguments:
   -i, --print-instances
                         Print all individual sentences and their errors.
   -r, --print-errors    Print all individual sentences that contain errors.
-  -id, --has-ids        Hypothesis and reference files have ids in the last
-                        token?
+  --head-ids            Hypothesis and reference files have ids in the head
+                        token? (Kaldi format)
+  --tail-ids            Hypothesis and reference files have ids in the last
+                        token? (Sphinx format)
   -c, --confusions      Print tables of which words were confused.
   -p, --print-wer-vs-length
                         Print table of average WER grouped by reference
