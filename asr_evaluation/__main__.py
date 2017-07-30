@@ -23,7 +23,7 @@ def get_parser():
                             help='Print all individual sentences that contain errors.')
     parser.add_argument('--head-ids', action='store_true',
                         help='Hypothesis and reference files have ids in the first token? (Kaldi format)')
-    parser.add_argument('--tail-ids', action='store_true',
+    parser.add_argument('-id', '--tail-ids', '--has-ids', action='store_true',
                         help='Hypothesis and reference files have ids in the last token? (Sphinx format)')
     parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused.')
     parser.add_argument('-p', '--print-wer-vs-length', action='store_true',
