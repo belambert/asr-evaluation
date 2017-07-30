@@ -46,7 +46,8 @@ For command line usage, see:
 It should display something like this:
 
 ```    
-usage: wer [-h] [-i | -r] [-id] [-c] [-p] [-m count] [-a] [-e] ref hyp
+usage: wer [-h] [-i | -r] [--head-ids] [-id] [-c] [-p] [-m count] [-a] [-e]
+           ref hyp
 
 Evaluate an ASR transcript against a reference transcript.
 
@@ -59,9 +60,10 @@ optional arguments:
   -i, --print-instances
                         Print all individual sentences and their errors.
   -r, --print-errors    Print all individual sentences that contain errors.
-  --head-ids            Hypothesis and reference files have ids in the head
+  --head-ids            Hypothesis and reference files have ids in the first
                         token? (Kaldi format)
-  --tail-ids            Hypothesis and reference files have ids in the last
+  -id, --tail-ids, --has-ids
+                        Hypothesis and reference files have ids in the last
                         token? (Sphinx format)
   -c, --confusions      Print tables of which words were confused.
   -p, --print-wer-vs-length
@@ -73,6 +75,5 @@ optional arguments:
                         Down-case the text before running the evaluation.
   -e, --remove-empty-refs
                         Skip over any examples where the reference is empty.
-
 ```
 
