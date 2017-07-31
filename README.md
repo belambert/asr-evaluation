@@ -1,6 +1,5 @@
 asr_evaluation
 ==============
-
 [![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=master)](https://travis-ci.org/belambert/asr-evaluation)
 [![PyPI version](https://badge.fury.io/py/asr_evaluation.svg)](https://badge.fury.io/py/asr_evaluation)
 [![codecov](https://codecov.io/gh/belambert/asr-evaluation/branch/master/graph/badge.svg)](https://codecov.io/gh/belambert/asr-evaluation)
@@ -19,7 +18,6 @@ Please let me know if you have any comments, questions, or problems.
 
 Installing & uninstalling
 -------------------------
-
 The easiest way to install is using pip:
 
     pip install asr-evaluation
@@ -37,7 +35,6 @@ To uninstall with pip:
 
 Command line usage
 ------------------
-
 For command line usage, see:
 ```
     wer --help
@@ -77,3 +74,10 @@ optional arguments:
                         Skip over any examples where the reference is empty.
 ```
 
+Contributing and code of conduct
+--------------------------------
+For contributions, it's best to Github issues and pull requests. Proper
+testing and documentation suggested.
+
+Code of conduct is expected to be reasonable, especially as specified by
+the [Contributor Covenant][http://contributor-covenant.org/version/1/4/]
