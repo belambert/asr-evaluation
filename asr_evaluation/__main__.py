@@ -28,8 +28,8 @@ def get_parser():
     parser.add_argument('-c', '--confusions', action='store_true', help='Print tables of which words were confused.')
     parser.add_argument('-p', '--print-wer-vs-length', action='store_true',
                         help='Print table of average WER grouped by reference sentence length.')
-    parser.add_argument('-m', '--min-word-count', type=int, default=10, metavar='count',
-                        help='Minimum word count to show a word in confusions.')
+    parser.add_argument('-m', '--min-word-count', type=int, default=1, metavar='count',
+                        help='Minimum word count to show a word in confusions (default 1).')
     parser.add_argument('-a', '--case-insensitive', action='store_true',
                         help='Down-case the text before running the evaluation.')
     parser.add_argument('-e', '--remove-empty-refs', action='store_true',

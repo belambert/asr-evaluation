@@ -239,17 +239,17 @@ def print_confusions():
     if len(insertion_table) > 0:
         print('INSERTIONS:')
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
-            if item[1] > min_count:
+            if item[1] >= min_count:
                 print('{0:20s} {1:10d}'.format(*item))
     if len(deletion_table) > 0:
         print('DELETIONS:')
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
-            if item[1] > min_count:
+            if item[1] >= min_count:
                 print('{0:20s} {1:10d}'.format(*item))
     if len(substitution_table) > 0:
         print('SUBSTITUTIONS:')
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
-            if count > min_count:
+            if count >= min_count:
                 print('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
 
 # TODO - For some reason I was getting two different counts depending on how I count the matches,
