@@ -8,7 +8,7 @@ import argparse
 # For some reason Python 2 and Python 3 disagree about how to import this.
 try:
     from asr_evaluation.asr_evaluation import main as other_main
-except:
+except Exception:
     from asr_evaluation import main as other_main
 
 def get_parser():
