@@ -1,10 +1,8 @@
 from setuptools import setup
 
-version='2.0.2'
-
 setup(
     name='asr_evaluation',
-    version=version,
+    version='2.0.2',
     author='Ben Lambert',
     author_email='ben@benjaminlambert.com',
     packages=['asr_evaluation'],
@@ -16,5 +14,15 @@ setup(
         'console_scripts': [
             'wer = asr_evaluation.__main__:main'
         ]
-    }
+    },
+    keywords=['word', 'error', 'rate', 'asr', 'speech', 'recognition'],
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Programming Language :: Python",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Text Processing",
+        "Topic :: Utilities",
+        "License :: OSI Approved :: Apache Software License"
+    ]
 )

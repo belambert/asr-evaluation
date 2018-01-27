@@ -24,5 +24,5 @@ deploy:
   password:
     secure: AorFwvGFVx1yLdG5xZvHE2Zl6z0PQ9extTB81t9mxD+ke4KM5PZbMKr3mwejK5jYvsyfKz7kIaGUhHopZtk4oN+XoQgDVrW0QEu/JVSOmXjNRalmG90ujehoSU6w22Wl/rljcJoh9q+NknJq229SeYT2SwP9KqSiXHyr/SpCKORoRcXd26lUAXu1rp2wpcYFg0oCNo7NG5bnc+T+d7qaqbjD1mpHdwmlC/SMuN3tzHek+sG6k537NukhgDynRHHYdAhumMYbSgKWicZUHxk7dMK+5d6iR7KtQxE6gVA6OZt7HbF5JLVzfRlWFwow+tk608Qfyp275+j6t6fGnVnANjpA3Tmdd5xGJSY+riYTImE8znzEIkH4CdhlRBNmu/w3pRXrSBzGXaPQCc6l0i+j+1NOihXAL5doklMF92PFUuUProoKFPfm+YSAYwYkNMdIgUeCTpq9cnvV5pXykeaPZEovWVtMvPsTIRArLkzxHVDeCjfsKefkXxtaeIpUofyFnYuMZaZLuTpKSRZ8AhnjEu+bANPNWlB2vl+aw3rhzYxoqrOw6rh+AfyAlRBkTK2gp8UmOeFrGCBVXrjnPtMUSxa+Gxl+GTx0imeFEb1Kw7fCRtEiJ2ag1dVVK3UnrZiPfa/IzMRxliwXEyYwmDcK1DM1mIUka6/1KoxRP2oppl8=
   on:
-    distributions: sdist bdist_wheel
-    repo: belambert/asr-evaluation
+    tags: true
+    python: '3.6'
