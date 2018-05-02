@@ -142,7 +142,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     match_count += matches
     ref_token_count += ref_length
 
-    if error_count != 0:
+    if errors != 0:
         sent_error_count += 1
 
     # If we're keeping track of which words get mixed up with which others, call track_confusions
