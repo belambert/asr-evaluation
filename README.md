@@ -16,6 +16,14 @@ This may run a bit faster if neither instances nor confusions are printed.
 
 Please let me know if you have any comments, questions, or problems.
 
+Output
+------
+The program outputs three standard measurements:
+ - [Word error rate (WER)](https://en.wikipedia.org/wiki/Word_error_rate)
+ - Word recognition rate (the number of _matched_ words in the alignment divided by the number of words in the reference).
+ - Sentence error rate (SER) (the number of incorrect sentences divided by the total number of sentences).
+
+
 Installing & uninstalling
 -------------------------
 The easiest way to install is using pip:
