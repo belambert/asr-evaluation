@@ -10,6 +10,8 @@ setup(
     description='Evaluating ASR (automatic speech recognition) hypotheses, i.e. computing word error rate.',
     install_requires=['edit_distance', 'termcolor'],
     test_suite='test.test.TestASREvaluation',
+    long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
     entry_points={
         'console_scripts': [
             'wer = asr_evaluation.__main__:main'
