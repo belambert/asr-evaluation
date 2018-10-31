@@ -4,7 +4,7 @@ setup(
     name='asr_evaluation',
     version='2.0.3',
     author='Ben Lambert',
-    author_email='ben@benjaminlambert.com',
+    author_email='blambert@gmail.com',
     packages=['asr_evaluation'],
     license='LICENSE.txt',
     description='Evaluating ASR (automatic speech recognition) hypotheses, i.e. computing word error rate.',
