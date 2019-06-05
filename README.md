@@ -80,6 +80,8 @@ optional arguments:
                         Down-case the text before running the evaluation.
   -e, --remove-empty-refs
                         Skip over any examples where the reference is empty.
+  -P, --punctuation-insensitive
+                        Strip punctuation from text before running the evaluation.
 ```
 
 Contributing and code of conduct

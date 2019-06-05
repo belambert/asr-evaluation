@@ -23,6 +23,7 @@ from collections import defaultdict
 from edit_distance import SequenceMatcher
 
 from termcolor import colored
+import string
 
 # Some defaults
 print_instances_p = False
@@ -73,7 +74,7 @@ def main(args):
     # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in zip(args.ref, args.hyp):
         processed_p = process_line_pair(ref_line, hyp_line, case_insensitive=args.case_insensitive,
-                                        remove_empty_refs=args.remove_empty_refs)
+                                        remove_empty_refs=args.remove_empty_refs,punctuation_insensitive=args.punctuation_insensitive)
         if processed_p:
             counter += 1
     if confusions:
@@ -98,7 +99,7 @@ def main(args):
     print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
 
 
-def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
+def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False, punctuation_insensitive=False):
     """Given a pair of strings corresponding to a reference and hypothesis,
     compute the edit distance, print if desired, and keep track of results
     in global variables.
@@ -113,7 +114,9 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
 
     # Split into tokens by whitespace
     ref = ref_line.split()
+    print(ref)
     hyp = hyp_line.split()
+    print(hyp)
     id_ = None
 
     # If the files have IDs, then split the ID off from the text
@@ -129,6 +132,9 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
         hyp = list(map(str.lower, hyp))
     if remove_empty_refs and len(ref) == 0:
         return False
+    if punctuation_insensitive:
+        ref = " ".join(map(str, ref)).translate(None, string.punctuation).split()
+        hyp = " ".join(map(str, hyp)).translate(None, string.punctuation).split()
 
     # Create an object to get the edit distance, and then retrieve the
     # relevant counts that we need.

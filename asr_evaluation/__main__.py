@@ -49,6 +49,8 @@ def get_parser():
                         help='Down-case the text before running the evaluation.')
     parser.add_argument('-e', '--remove-empty-refs', action='store_true',
                         help='Skip over any examples where the reference is empty.')
+    parser.add_argument('-P', '--punctuation-insensitive', action='store_true',
+                        help='Strip punctuation from text before running the evaluation.')
 
     return parser
 
