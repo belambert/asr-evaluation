@@ -131,8 +131,8 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     if remove_empty_refs and len(ref) == 0:
         return False
     if punctuation_insensitive:
-        ref = " ".join(map(str, ref)).translate(None, string.punctuation).split()
-        hyp = " ".join(map(str, hyp)).translate(None, string.punctuation).split()
+        ref = " ".join(ref).translate(None, string.punctuation).split()
+        hyp = " ".join(hyp).translate(None, string.punctuation).split()
 
     # Create an object to get the edit distance, and then retrieve the
     # relevant counts that we need.
