@@ -114,9 +114,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
 
     # Split into tokens by whitespace
     ref = ref_line.split()
-    print(ref)
     hyp = hyp_line.split()
-    print(hyp)
     id_ = None
 
     # If the files have IDs, then split the ID off from the text
