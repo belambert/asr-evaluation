@@ -208,10 +208,6 @@ def remove_tail_id(ref, hyp):
         exit(-1)
     ref = ref[:-1]
     hyp = hyp[:-2]
-    print(ref_id)
-    print(hyp_id)
-    print(ref)
-    print(hyp)
     return ref, hyp
 
 def print_instances(ref, hyp, sm, id_=None):
