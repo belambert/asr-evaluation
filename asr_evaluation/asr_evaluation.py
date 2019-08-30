@@ -200,14 +200,18 @@ def remove_tail_id(ref, hyp):
     """Assumes that the ID is the final token of the string which is common
     in Sphinx but not in Kaldi."""
     ref_id = ref[-1]
-    hyp_id = hyp[-1]
+    hyp_id = hyp[-2] + ')'
     if ref_id != hyp_id:
         print('Reference and hypothesis IDs do not match! '
               'ref="{}" hyp="{}"\n'
               'File lines in hyp file should match those in the ref file.'.format(ref_id, hyp_id))
         exit(-1)
     ref = ref[:-1]
-    hyp = hyp[:-1]
+    hyp = hyp[:-2]
+    print(ref_id)
+    print(hyp_id)
+    print(ref)
+    print(hyp)
     return ref, hyp
 
 def print_instances(ref, hyp, sm, id_=None):
