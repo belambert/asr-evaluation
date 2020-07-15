@@ -369,6 +369,6 @@ def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
     items = wer_bins.items()
     avg_wers = {length: mean(wers) for length, wers in wer_bins.items()}
-    for length, avg_wer in sorted(avg_wers.items(), key=lambda x: x[1]):
+    for length, avg_wer in sorted(avg_wers.items(), key=lambda x: (x[1], x[0])):
         print('{0:5d} {1:f}'.format(length, avg_wer))
     print('')
