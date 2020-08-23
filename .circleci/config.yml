@@ -13,10 +13,12 @@ jobs:
       - python/save-cache
       - run:
           command: python setup.py test
-          name: test
+          name: Unit tests
       - run:
-          command: flake8 asr_evaluation
-          name: style check
+          command: |
+            . venv/bin/activate
+            flake8 asr_evaluation
+          name: Style check
 
 workflows:
   main:
