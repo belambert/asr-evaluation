@@ -2,22 +2,18 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
-  
+
 jobs:
   build-and-test:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
       - python/install-deps
-      - python/save-cache
       - run:
           command: python setup.py test
           name: Unit tests
       - run:
-          command: |
-            . venv/bin/activate
-            flake8 asr_evaluation
+          command: flake8 asr_evaluation
           name: Style check
 
 workflows:
