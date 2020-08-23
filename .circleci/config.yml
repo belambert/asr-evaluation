@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
-
+  
 jobs:
   build-and-test:
     executor: python/default
@@ -13,7 +13,10 @@ jobs:
       - python/save-cache
       - run:
           command: python setup.py test
-          name: Test
+          name: test
+      - run:
+          command: flake8 asr_evaluation
+          name: style check
 
 workflows:
   main:
