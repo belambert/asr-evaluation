@@ -55,6 +55,11 @@ substitution_table = defaultdict(int)
 error_codes = ['replace', 'delete', 'insert']
 
 
+class AsrEvaluationResults(dict):
+    def __getattr__(self, name):
+        return self[name]
+
+
 # TODO - rename this function.  Move some of it into evaluate.py?
 def main(args):
     """Main method - this reads the hyp and ref files, and creates
@@ -67,6 +72,21 @@ def main(args):
     shortest one runs out of lines.  This should be easy to fix...
     """
     global counter
+    results = evaluate(args)
+
+    if confusions:
+        print_confusions()
+    if wer_vs_length_p:
+        print_wer_vs_length()
+
+    print('Sentence count: {}'.format(counter))
+    print('WER: {:10.3%} ({:10d} / {:10d})'.format(results.wer, error_count, ref_token_count))
+    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(results.wrr, match_count, ref_token_count))
+    print('SER: {:10.3%} ({:10d} / {:10d})'.format(results.ser, sent_error_count, counter))
+
+
+def evaluate(args):
+    global counter
     set_global_variables(args)
 
     counter = 0
@@ -76,10 +96,7 @@ def main(args):
                                         remove_empty_refs=args.remove_empty_refs)
         if processed_p:
             counter += 1
-    if confusions:
-        print_confusions()
-    if wer_vs_length_p:
-        print_wer_vs_length()
+
     # Compute WER and WRR
     if ref_token_count > 0:
         wrr = match_count / ref_token_count
@@ -92,10 +109,21 @@ def main(args):
         ser = sent_error_count / counter
     else:
         ser = 0.0
-    print('Sentence count: {}'.format(counter))
-    print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
-    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
-    print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
+
+    substitutions = map(lambda item: {'ref': item[0][0], 'hyp': item[0][1], 'count': item[1]},
+                        substitution_table.items())
+    return AsrEvaluationResults({
+        'sentence_count': counter,
+        'ref_token_count': ref_token_count,
+        'match_count': match_count,
+        'error_count': error_count,
+        'wer': wer,
+        'wrr': wrr,
+        'ser': ser,
+        'insertions': insertion_table,
+        'deletions': deletion_table,
+        'substitutions': list(substitutions)
+    })
 
 
 def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
@@ -164,6 +192,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     wer_bins[len(ref)].append(error_rate)
     return True
 
+
 def set_global_variables(args):
     """Copy argparse args into global variables."""
     global print_instances_p
@@ -182,6 +211,7 @@ def set_global_variables(args):
     min_count = args.min_word_count
     wer_vs_length_p = args.print_wer_vs_length
 
+
 def remove_head_id(ref, hyp):
     """Assumes that the ID is the begin token of the string which is common
     in Kaldi but not in Sphinx."""
@@ -195,6 +225,7 @@ def remove_head_id(ref, hyp):
     ref = ref[1:]
     hyp = hyp[1:]
     return ref, hyp
+
 
 def remove_tail_id(ref, hyp):
     """Assumes that the ID is the final token of the string which is common
@@ -210,9 +241,13 @@ def remove_tail_id(ref, hyp):
     hyp = hyp[:-1]
     return ref, hyp
 
+
 def print_instances(ref, hyp, sm, id_=None):
     """Print a single instance of a ref/hyp pair."""
-    print_diff(sm, ref, hyp)
+    ref_sentence, hyp_sentence = get_diffs(sm, ref, hyp)
+    print(ref_sentence)
+    print(hyp_sentence)
+
     if id_:
         print(('SENTENCE {0:d}  {1!s}'.format(counter + 1, id_)))
     else:
@@ -229,6 +264,7 @@ def print_instances(ref, hyp, sm, id_=None):
         error_rate = sm.matches()
     print('Correct          = {0:6.1%}  {1:3d}   ({2:6d})'.format(correct_rate, sm.matches(), len(ref)))
     print('Errors           = {0:6.1%}  {1:3d}   ({2:6d})'.format(error_rate, sm.distance(), len(ref)))
+
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -248,6 +284,7 @@ def track_confusions(sm, seq1, seq2):
                     key = (w1, w2)
                     substitution_table[key] += 1
 
+
 def print_confusions():
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
@@ -266,6 +303,7 @@ def print_confusions():
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count >= min_count:
                 print('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
+
 
 # TODO - For some reason I was getting two different counts depending on how I count the matches,
 # so do an assertion in this code to make sure we're getting matching counts.
@@ -289,11 +327,11 @@ def get_error_count(sm):
     error_lengths = [max(x[2] - x[1], x[4] - x[3]) for x in errors]
     return reduce(lambda x, y: x + y, error_lengths, 0)
 
+
 # TODO - This is long and ugly.  Perhaps we can break it up?
-# It would make more sense for this to just return the two strings...
-def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suffix2=None):
-    """Given a sequence matcher and the two sequences, print a Sphinx-style
-    'diff' off the two."""
+def get_diffs(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suffix2=None):
+    """Given a sequence matcher and the two sequences, returns the Sphinx-style
+    'diff' of the two strings."""
     ref_tokens = []
     hyp_tokens = []
     opcodes = sm.get_opcodes()
@@ -358,12 +396,14 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
     if prefix2: hyp_tokens.insert(0, prefix2)
     if suffix1: ref_tokens.append(suffix1)
     if suffix2: hyp_tokens.append(suffix2)
-    print(' '.join(ref_tokens))
-    print(' '.join(hyp_tokens))
+
+    return ' '.join(ref_tokens), ' '.join(hyp_tokens)
+
 
 def mean(seq):
     """Return the average of the elements of a sequence."""
     return float(sum(seq)) / len(seq) if len(seq) > 0 else float('nan')
+
 
 def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
