@@ -40,10 +40,6 @@ lengths = []
 error_rates = []
 wer_bins = defaultdict(list)
 wer_vs_length = defaultdict(list)
-# Tables for keeping track of which words get confused with one another
-insertion_table = defaultdict(int)
-deletion_table = defaultdict(int)
-substitution_table = defaultdict(int)
 # These are the editdistance opcodes that are condsidered 'errors'
 error_codes = ['replace', 'delete', 'insert']
 
@@ -53,7 +49,6 @@ class AsrEvaluationResults(dict):
         return self[name]
 
 
-# TODO - rename this function.  Move some of it into evaluate.py?
 def main(args):
     """Main method - this reads the hyp and ref files, and creates
     editdistance.SequenceMatcher objects to compute the edit distance.
@@ -67,7 +62,7 @@ def main(args):
     results = evaluate(args)
 
     if confusions:
-        print_confusions()
+        print_confusions(results.insertions, results.deletions, results.substitutions)
     if wer_vs_length_p:
         print_wer_vs_length()
 
@@ -85,10 +80,15 @@ def evaluate(args):
     error_count = 0
     sent_error_count = 0
 
+    insertion_table = defaultdict(int)
+    deletion_table = defaultdict(int)
+    substitution_table = defaultdict(int)
+
     line_count = 0
     # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in zip(args.ref, args.hyp):
-        processed_p, ref_length, matches, errors = process_line_pair(ref_line, hyp_line, line_count,
+        processed_p, ref_length, matches, errors = process_line_pair(ref_line, hyp_line, line_count, insertion_table,
+                                                                     deletion_table, substitution_table,
                                                                      case_insensitive=args.case_insensitive,
                                                                      remove_empty_refs=args.remove_empty_refs)
         if processed_p:
@@ -130,7 +130,8 @@ def evaluate(args):
     })
 
 
-def process_line_pair(ref_line, hyp_line, line_count, case_insensitive=False, remove_empty_refs=False):
+def process_line_pair(ref_line, hyp_line, line_count, insertion_table, deletion_table, substitution_table,
+                      case_insensitive=False, remove_empty_refs=False):
     """Given a pair of strings corresponding to a reference and hypothesis,
     compute the edit distance, print if desired, and keep track of results
     in global variables.
@@ -168,7 +169,7 @@ def process_line_pair(ref_line, hyp_line, line_count, case_insensitive=False, re
 
     # If we're keeping track of which words get mixed up with which others, call track_confusions
     if confusions:
-        track_confusions(sm, ref, hyp)
+        track_confusions(sm, ref, hyp, insertion_table, deletion_table, substitution_table)
 
     # If we're printing instances, do it here (in roughly the align.c format)
     if print_instances_p or (print_errors_p and errors != 0):
@@ -259,7 +260,7 @@ def print_instances(ref, hyp, sm, line_count, id_=None):
     print('Errors           = {0:6.1%}  {1:3d}   ({2:6d})'.format(error_rate, sm.distance(), len(ref)))
 
 
-def track_confusions(sm, seq1, seq2):
+def track_confusions(sm, seq1, seq2, insertion_table, deletion_table, substitution_table):
     """Keep track of the errors in a global variable, given a sequence matcher."""
     opcodes = sm.get_opcodes()
     for tag, i1, i2, j1, j2 in opcodes:
@@ -278,7 +279,7 @@ def track_confusions(sm, seq1, seq2):
                     substitution_table[key] += 1
 
 
-def print_confusions():
+def print_confusions(insertion_table, deletion_table, substitutions_list):
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
     if len(insertion_table) > 0:
@@ -291,11 +292,11 @@ def print_confusions():
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] >= min_count:
                 print('{0:20s} {1:10d}'.format(*item))
-    if len(substitution_table) > 0:
+    if len(substitutions_list) > 0:
         print('SUBSTITUTIONS:')
-        for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
-            if count >= min_count:
-                print('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
+        for substitution in substitutions_list:
+            if substitution['count'] >= min_count:
+                print('{0:20s} -> {1:20s}   {2:10d}'.format(substitution['ref'], substitution['hyp'], substitution['count']))
 
 
 # TODO - For some reason I was getting two different counts depending on how I count the matches,
