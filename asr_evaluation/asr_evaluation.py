@@ -33,13 +33,6 @@ confusions = False
 min_count = 0
 wer_vs_length_p = True
 
-# For keeping track of the total number of tokens, errors, and matches
-ref_token_count = 0
-error_count = 0
-match_count = 0
-counter = 0
-sent_error_count = 0
-
 # For keeping track of word error rates by sentence length
 # this is so we can see if performance is better/worse for longer
 # and/or shorter sentences
@@ -71,7 +64,6 @@ def main(args):
     hypothesis file have the same number of lines.  It will stop after the
     shortest one runs out of lines.  This should be easy to fix...
     """
-    global counter
     results = evaluate(args)
 
     if confusions:
@@ -79,23 +71,34 @@ def main(args):
     if wer_vs_length_p:
         print_wer_vs_length()
 
-    print('Sentence count: {}'.format(counter))
-    print('WER: {:10.3%} ({:10d} / {:10d})'.format(results.wer, error_count, ref_token_count))
-    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(results.wrr, match_count, ref_token_count))
-    print('SER: {:10.3%} ({:10d} / {:10d})'.format(results.ser, sent_error_count, counter))
+    print('Sentence count: {}'.format(results.sentence_count))
+    print('WER: {:10.3%} ({:10d} / {:10d})'.format(results.wer, results.error_count, results.ref_token_count))
+    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(results.wrr, results.match_count, results.ref_token_count))
+    print('SER: {:10.3%} ({:10d} / {:10d})'.format(results.ser, results.sent_error_count, results.sentence_count))
 
 
 def evaluate(args):
-    global counter
     set_global_variables(args)
 
-    counter = 0
+    ref_token_count = 0
+    match_count = 0
+    error_count = 0
+    sent_error_count = 0
+
+    line_count = 0
     # Loop through each line of the reference and hyp file
     for ref_line, hyp_line in zip(args.ref, args.hyp):
-        processed_p = process_line_pair(ref_line, hyp_line, case_insensitive=args.case_insensitive,
-                                        remove_empty_refs=args.remove_empty_refs)
+        processed_p, ref_length, matches, errors = process_line_pair(ref_line, hyp_line, line_count,
+                                                                     case_insensitive=args.case_insensitive,
+                                                                     remove_empty_refs=args.remove_empty_refs)
         if processed_p:
-            counter += 1
+            line_count += 1
+            ref_token_count += ref_length
+            match_count += matches
+            error_count += errors
+
+            if errors != 0:
+                sent_error_count += 1
 
     # Compute WER and WRR
     if ref_token_count > 0:
@@ -105,18 +108,19 @@ def evaluate(args):
         wrr = 0.0
         wer = 0.0
     # Compute SER
-    if counter > 0:
-        ser = sent_error_count / counter
+    if line_count > 0:
+        ser = sent_error_count / line_count
     else:
         ser = 0.0
 
     substitutions = map(lambda item: {'ref': item[0][0], 'hyp': item[0][1], 'count': item[1]},
                         substitution_table.items())
     return AsrEvaluationResults({
-        'sentence_count': counter,
+        'sentence_count': line_count,
         'ref_token_count': ref_token_count,
         'match_count': match_count,
         'error_count': error_count,
+        'sent_error_count': sent_error_count,
         'wer': wer,
         'wrr': wrr,
         'ser': ser,
@@ -126,18 +130,15 @@ def evaluate(args):
     })
 
 
-def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
+def process_line_pair(ref_line, hyp_line, line_count, case_insensitive=False, remove_empty_refs=False):
     """Given a pair of strings corresponding to a reference and hypothesis,
     compute the edit distance, print if desired, and keep track of results
     in global variables.
 
     Return true if the pair was counted, false if the pair was not counted due
-    to an empty reference string."""
-    # I don't believe these all need to be global.  In any case, they shouldn't be.
-    global error_count
-    global match_count
-    global ref_token_count
-    global sent_error_count
+    to an empty reference string.
+
+    Also returns the ref token count, match count, and error count for this line pair."""
 
     # Split into tokens by whitespace
     ref = ref_line.split()
@@ -156,7 +157,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
         ref = list(map(str.lower, ref))
         hyp = list(map(str.lower, hyp))
     if remove_empty_refs and len(ref) == 0:
-        return False
+        return False, 0, 0, 0
 
     # Create an object to get the edit distance, and then retrieve the
     # relevant counts that we need.
@@ -165,21 +166,13 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     matches = get_match_count(sm)
     ref_length = len(ref)
 
-    # Increment the total counts we're tracking
-    error_count += errors
-    match_count += matches
-    ref_token_count += ref_length
-
-    if errors != 0:
-        sent_error_count += 1
-
     # If we're keeping track of which words get mixed up with which others, call track_confusions
     if confusions:
         track_confusions(sm, ref, hyp)
 
     # If we're printing instances, do it here (in roughly the align.c format)
     if print_instances_p or (print_errors_p and errors != 0):
-        print_instances(ref, hyp, sm, id_=id_)
+        print_instances(ref, hyp, sm, line_count, id_=id_)
 
     # Keep track of the individual error rates, and reference lengths, so we
     # can compute average WERs by sentence length
@@ -190,7 +183,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
         error_rate = float("inf")
     error_rates.append(error_rate)
     wer_bins[len(ref)].append(error_rate)
-    return True
+    return True, ref_length, matches, errors
 
 
 def set_global_variables(args):
@@ -242,16 +235,16 @@ def remove_tail_id(ref, hyp):
     return ref, hyp
 
 
-def print_instances(ref, hyp, sm, id_=None):
+def print_instances(ref, hyp, sm, line_count, id_=None):
     """Print a single instance of a ref/hyp pair."""
     ref_sentence, hyp_sentence = get_diffs(sm, ref, hyp)
     print(ref_sentence)
     print(hyp_sentence)
 
     if id_:
-        print(('SENTENCE {0:d}  {1!s}'.format(counter + 1, id_)))
+        print(('SENTENCE {0:d}  {1!s}'.format(line_count + 1, id_)))
     else:
-        print('SENTENCE {0:d}'.format(counter + 1))
+        print('SENTENCE {0:d}'.format(line_count + 1))
     # Handle cases where the reference is empty without dying
     if len(ref) != 0:
         correct_rate = sm.matches() / len(ref)
