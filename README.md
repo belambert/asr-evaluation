@@ -1,8 +1,8 @@
 asr_evaluation
 ==============
-[![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=master)](https://travis-ci.org/belambert/asr-evaluation)
+[![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=main)](https://travis-ci.org/belambert/asr-evaluation)
 [![PyPI version](https://badge.fury.io/py/asr_evaluation.svg)](https://badge.fury.io/py/asr_evaluation)
-[![codecov](https://codecov.io/gh/belambert/asr-evaluation/branch/master/graph/badge.svg)](https://codecov.io/gh/belambert/asr-evaluation)
+[![codecov](https://codecov.io/gh/belambert/asr-evaluation/branch/main/graph/badge.svg)](https://codecov.io/gh/belambert/asr-evaluation)
 
 Python module for evaluting ASR hypotheses (i.e. word error rate and word 
 recognition rate).
