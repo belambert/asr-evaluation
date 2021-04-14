@@ -88,10 +88,7 @@ def main(args):
         wrr = 0.0
         wer = 0.0
     # Compute SER
-    if counter > 0:
-        ser = sent_error_count / counter
-    else:
-        ser = 0.0
+    ser = sent_error_count / counter if counter > 0 else 0.0
     print('Sentence count: {}'.format(counter))
     print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
     print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
@@ -156,10 +153,7 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     # Keep track of the individual error rates, and reference lengths, so we
     # can compute average WERs by sentence length
     lengths.append(ref_length)
-    if len(ref) > 0:
-        error_rate = errors * 1.0 / len(ref)
-    else:
-        error_rate = float("inf")
+    error_rate = errors * 1.0 / len(ref) if len(ref) > 0 else float("inf")
     error_rates.append(error_rate)
     wer_bins[len(ref)].append(error_rate)
     return True
