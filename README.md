@@ -1,8 +1,6 @@
-asr_evaluation
+ASR Evaluation for Spring 2022 INFSCI 2935 Fairness in ML Project
 ==============
-[![Build Status](https://travis-ci.org/belambert/asr-evaluation.svg?branch=main)](https://travis-ci.org/belambert/asr-evaluation)
-[![PyPI version](https://badge.fury.io/py/asr_evaluation.svg)](https://badge.fury.io/py/asr_evaluation)
-[![codecov](https://codecov.io/gh/belambert/asr-evaluation/branch/main/graph/badge.svg)](https://codecov.io/gh/belambert/asr-evaluation)
+Original fork at [asr-evaluation](https://github.com/belambert/asr-evaluation)
 
 Python module for evaluting ASR hypotheses (i.e. word error rate and word 
 recognition rate).
