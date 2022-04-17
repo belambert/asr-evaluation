@@ -33,7 +33,7 @@ confusions = False
 min_count = 0
 wer_vs_length_p = True
 
-# For keeping track of the total number of tokens, errors, and matches
+# more defaults, For keeping track of the total number of tokens, errors, and matches
 ref_token_count = 0
 error_count = 0
 match_count = 0
@@ -102,11 +102,11 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
 
     Return true if the pair was counted, false if the pair was not counted due
     to an empty reference string."""
-    # I don't believe these all need to be global.  In any case, they shouldn't be.
-    global error_count
-    global match_count
-    global ref_token_count
-    global sent_error_count
+    # # I don't believe these all need to be global.  In any case, they shouldn't be.
+    # global error_count
+    # global match_count
+    # global ref_token_count
+    # global sent_error_count
 
     # Split into tokens by whitespace
     ref = ref_line.split()
@@ -167,6 +167,11 @@ def set_global_variables(args):
     global confusions
     global min_count
     global wer_vs_length_p
+    global ref_token_count
+    global error_count
+    global match_count
+    global counter
+    global sent_error_count
     # Put the command line options into global variables.
     print_instances_p = args.print_instances
     print_errors_p = args.print_errors
@@ -175,6 +180,10 @@ def set_global_variables(args):
     confusions = args.confusions
     min_count = args.min_word_count
     wer_vs_length_p = args.print_wer_vs_length
+    ref_token_count = args.ref_token_count
+    error_count = args.error_count
+    match_count = args.match_count
+    sent_error_count = args.sent_error_count
 
 def remove_head_id(ref, hyp):
     """Assumes that the ID is the begin token of the string which is common
