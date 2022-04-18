@@ -82,9 +82,12 @@ class ASR_BIAS_EVAL(object):
         self.counter = 0
         # Loop through each line of the reference and hyp file
         for ref_line, hyp_line in zip(self.ref, self.hyp):
-            processed_p = self.process_line_pair(ref_line, hyp_line, case_insensitive=self.case_insensitive,
-                                            remove_empty_refs=self.remove_empty_refs)
-            if processed_p:
+            if processed_p := self.process_line_pair(
+                ref_line,
+                hyp_line,
+                case_insensitive=self.case_insensitive,
+                remove_empty_refs=self.remove_empty_refs,
+            ):
                 self.counter += 1
         if self.confusions:
             self.print_confusions()
@@ -340,8 +343,6 @@ class ASR_BIAS_EVAL(object):
                     ref_tokens.append(seq1[i].lower())
                 for i in range(j1, j2):
                     hyp_tokens.append(seq2[i].lower())
-            # For insertions and deletions, put a filler of '***' on the other one, and
-            # make the other all caps
             elif tag == 'delete':
                 for i in range(i1, i2):
                     ref_token = colored(seq1[i].upper(), 'red')
@@ -356,7 +357,6 @@ class ASR_BIAS_EVAL(object):
                 for i in range(j1, j2):
                     hyp_token = colored(seq2[i].upper(), 'red')
                     hyp_tokens.append(hyp_token)
-            # More complicated logic for a substitution
             elif tag == 'replace':
                 seq1_len = i2 - i1
                 seq2_len = j2 - j1
@@ -365,14 +365,12 @@ class ASR_BIAS_EVAL(object):
                 s2 = list(map(str.upper, seq2[j1:j2]))
                 # Pad the two lists with False values to get them to the same length
                 if seq1_len > seq2_len:
-                    for i in range(0, seq1_len - seq2_len):
-                        s2.append(False)
+                    s2.extend(False for _ in range(seq1_len - seq2_len))
                 if seq1_len < seq2_len:
-                    for i in range(0, seq2_len - seq1_len):
-                        s1.append(False)
+                    s1.extend(False for _ in range(seq2_len - seq1_len))
                 assert len(s1) == len(s2)
                 # Pair up words with their substitutions, or fillers
-                for i in range(0, len(s1)):
+                for i in range(len(s1)):
                     w1 = s1[i]
                     w2 = s2[i]
                     # If we have two words, make them the same length
