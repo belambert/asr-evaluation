@@ -24,7 +24,7 @@ import argparse
 try:
     from asr_evaluation.asr_evaluation import main as other_main
 except Exception:
-    from asr_evaluation import main as other_main
+    from asr_evaluation import ASR_BIAS_EVAL
 
 def get_parser():
     """Parse the CLI args."""
@@ -56,7 +56,8 @@ def main():
     """Run the program."""
     parser = get_parser()
     args = parser.parse_args()
-    other_main(args)
+    asr_eval = ASR_BIAS_EVAL(args)
+    asr_eval.main()
 
 if __name__ == "__main__":
     main()
