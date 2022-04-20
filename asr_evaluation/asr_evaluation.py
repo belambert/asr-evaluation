@@ -89,7 +89,7 @@ def main(args):
         wer = 0.0
     # Compute SER
     ser = sent_error_count / counter if counter > 0 else 0.0
-    print('Sentence count: {}'.format(counter))
+    print(f'Sentence count: {counter}')
     print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
     print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
     print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
@@ -228,14 +228,12 @@ def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
     opcodes = sm.get_opcodes()
     for tag, i1, i2, j1, j2 in opcodes:
-        if tag == 'insert':
-            for i in range(j1, j2):
-                word = seq2[i]
-                insertion_table[word] += 1
-        elif tag == 'delete':
+        if tag == 'delete':
             for i in range(i1, i2):
-                word = seq1[i]
-                deletion_table[word] += 1
+                deletion_table[seq1[i]] += 1
+        elif tag == 'insert':
+            for i in range(j1, j2):
+                insertion_table[seq2[i]] += 1
         elif tag == 'replace':
             for w1 in seq1[i1:i2]:
                 for w2 in seq2[j1:j2]:
@@ -298,8 +296,6 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
                 ref_tokens.append(seq1[i].lower())
             for i in range(j1, j2):
                 hyp_tokens.append(seq2[i].lower())
-        # For insertions and deletions, put a filler of '***' on the other one, and
-        # make the other all caps
         elif tag == 'delete':
             for i in range(i1, i2):
                 ref_token = colored(seq1[i].upper(), 'red')
@@ -314,7 +310,6 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
             for i in range(j1, j2):
                 hyp_token = colored(seq2[i].upper(), 'red')
                 hyp_tokens.append(hyp_token)
-        # More complicated logic for a substitution
         elif tag == 'replace':
             seq1_len = i2 - i1
             seq2_len = j2 - j1
@@ -323,14 +318,12 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
             s2 = list(map(str.upper, seq2[j1:j2]))
             # Pad the two lists with False values to get them to the same length
             if seq1_len > seq2_len:
-                for i in range(0, seq1_len - seq2_len):
-                    s2.append(False)
+                s2.extend(False for _ in range(seq1_len - seq2_len))
             if seq1_len < seq2_len:
-                for i in range(0, seq2_len - seq1_len):
-                    s1.append(False)
+                s1.extend(False for _ in range(seq2_len - seq1_len))
             assert len(s1) == len(s2)
             # Pair up words with their substitutions, or fillers
-            for i in range(0, len(s1)):
+            for i in range(len(s1)):
                 w1 = s1[i]
                 w2 = s2[i]
                 # If we have two words, make them the same length
