@@ -94,13 +94,48 @@ def main(args):
     print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
     print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
 
+def get_total_wer(print=False, wer_only=True):
+    """get the total wer after processing all line pairs 
+    using the process_line_pair function.
 
-def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
+    set print to True to print the results
+
+    if wer_only is true, returns only the WER
+
+    else returns a typle
+    (Word Error Rate, Word Right Rate, Sentence Error Rate)
+    """
+
+    if ref_token_count > 0:
+        wrr = match_count / ref_token_count
+        wer = error_count / ref_token_count
+    else:
+        wrr = 0.0
+        wer = 0.0
+    # Compute SER
+    ser = sent_error_count / counter if counter > 0 else 0.0
+    if print:
+        print('Sentence count: {}'.format(counter))
+        print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
+        print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
+        print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
+    if wer_only:
+        return wer
+    else:
+        return wer, wrr, ser
+
+
+def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False, return_values=False):
     """Given a pair of strings corresponding to a reference and hypothesis,
     compute the edit distance, print if desired, and keep track of results
     in global variables.
 
-    Return true if the pair was counted, false if the pair was not counted due
+    if return_values is False (default):
+    Return True if the pair was counted, False if the pair was not counted due
+    to an empty reference string.
+
+    if return values is True (added by BIU):
+    Return the error rate if the pair was counted, None if the pair was not counted due
     to an empty reference string."""
     # I don't believe these all need to be global.  In any case, they shouldn't be.
     global error_count
@@ -125,7 +160,10 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
         ref = list(map(str.lower, ref))
         hyp = list(map(str.lower, hyp))
     if remove_empty_refs and len(ref) == 0:
-        return False
+        if return_values:
+            return None
+        else:
+            return False
 
     # Create an object to get the edit distance, and then retrieve the
     # relevant counts that we need.
@@ -156,7 +194,10 @@ def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_r
     error_rate = errors * 1.0 / len(ref) if len(ref) > 0 else float("inf")
     error_rates.append(error_rate)
     wer_bins[len(ref)].append(error_rate)
-    return True
+    if return_values:
+        return error_rate
+    else:
+        return False
 
 def set_global_variables(args):
     """Copy argparse args into global variables."""
